@@ -1,10 +1,10 @@
 <meta charset="utf-8">
-<title>Particular Sandbox</title>
+<title>particular · atlas of worlds</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one square canvas as the stage, a narrow instrument panel beside it (below it on phones). */
+/* Layout: one square canvas as the stage, the instrument panel with the atlas map beside it (below it on phones). */
 :root {
   color-scheme: dark;
   --ground: #050507;
@@ -34,7 +34,7 @@ body {
 }
 .app {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) 480px;
   gap: 20px;
   padding-inline: 16px;
   padding-block: 16px;
@@ -137,34 +137,6 @@ button:hover { border-color: var(--muted); }
 button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 button:disabled { opacity: 0.45; cursor: default; border-color: var(--line); }
 button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; min-width: 5em; }
-.tabs { display: flex; gap: 4px; background: var(--raise); padding: 3px; border-radius: var(--radius); }
-.tabs button { flex: 1; border: 0; background: transparent; padding: 5px 4px; color: var(--muted); white-space: nowrap; }
-.tabs button[aria-selected="true"] { background: var(--line); color: var(--ink); }
-.thumbs {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
-}
-.thumb {
-  padding: 0;
-  border: 1px solid var(--line);
-  background: #000;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.thumb img { width: 100%; aspect-ratio: 1; display: block; }
-.thumb span {
-  font-family: var(--font-data);
-  font-size: 0.66rem;
-  color: var(--muted);
-  padding: 3px 4px 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.thumb[aria-pressed="true"] { border-color: var(--accent); }
-.thumb[aria-pressed="true"] span { color: var(--ink); }
 .note { margin: 0; color: var(--muted); font-size: var(--step--1); }
 .field { display: grid; grid-template-columns: 6.5em minmax(0, 1fr) 3.6em; align-items: center; gap: 8px; }
 .field label { color: var(--ink); }
@@ -197,9 +169,6 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
 .swatches { display: flex; gap: 6px; align-items: center; }
 .swatches input[type="color"] { width: 30px; height: 24px; padding: 0 2px; border: 1px solid var(--line); border-radius: 4px; background: var(--raise); cursor: pointer; }
 .field .seg, .field .swatches { grid-column: span 2; }
-/* Atlas: the panel widens so the map's cells are big enough to read. */
-.app.wide { grid-template-columns: minmax(0, 1fr) 480px; }
-.atlas { display: flex; flex-direction: column; gap: 10px; }
 .atlas-axes { display: grid; grid-template-columns: 4em minmax(0, 1fr); gap: 6px 8px; align-items: center; }
 .atlas-slice { display: flex; flex-direction: column; gap: 6px; }
 .atlas-slice > span { font-size: var(--step--1); color: var(--muted); }
@@ -216,7 +185,7 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
 #atlas-info { min-height: 4.4em; }
 [hidden] { display: none !important; }
 @media (max-width: 860px) {
-  .app, .app.wide { grid-template-columns: minmax(0, 1fr); }
+  .app { grid-template-columns: minmax(0, 1fr); }
   .frame { width: 100%; }
   .panel { max-height: none; }
 }
@@ -228,7 +197,7 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
       <canvas id="view" aria-label="Particle simulation. Click to add a ring and drag to throw it. Scroll or pinch to zoom."></canvas>
       <div class="zoom" role="group" aria-label="Zoom">
         <button id="zoom-out" aria-label="Zoom out">−</button>
-        <button id="zoom-level" title="Fit the setup in view">1.0×</button>
+        <button id="zoom-level" title="Fit the world in view">1.0×</button>
         <button id="zoom-in" aria-label="Zoom in">+</button>
       </div>
       <div class="readout"><span id="r-count">0 particles</span><span id="r-step">step 0</span></div>
@@ -238,7 +207,7 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
   <aside class="panel">
     <header>
       <h1>particular</h1>
-      <p class="lede">Particles pull on each other from far away and push apart up close. Pick a starting setup, change the forces, or click the canvas to add a ring.</p>
+      <p class="lede">An atlas of particle worlds. Particles pull on each other from far away and push apart up close. Pick a world on the map, change its forces and rules, or click the canvas to add a ring.</p>
     </header>
 
     <section aria-label="Playback">
@@ -252,29 +221,20 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
       <p class="desc" id="setup-desc"></p>
     </section>
 
-    <section aria-label="Starting setups">
-      <h2>Starting setups</h2>
-      <div class="tabs" role="tablist">
-        <button role="tab" id="tab-made" aria-selected="true">Hand-made</button>
-        <button role="tab" id="tab-eco" aria-selected="false">Ecosystems</button>
-        <button role="tab" id="tab-found" aria-selected="false">Found</button>
-        <button role="tab" id="tab-atlas" aria-selected="false" hidden>Atlas</button>
+    <section class="atlas" aria-label="Atlas of worlds">
+      <h2>Atlas of worlds</h2>
+      <div class="atlas-axes">
+        <label for="atlas-x">Across</label><select id="atlas-x"></select>
+        <label for="atlas-y">Up</label><select id="atlas-y"></select>
       </div>
-      <div class="thumbs" id="thumbs"></div>
-      <div class="atlas" id="atlas" hidden>
-        <div class="atlas-axes">
-          <label for="atlas-x">Across</label><select id="atlas-x"></select>
-          <label for="atlas-y">Up</label><select id="atlas-y"></select>
-        </div>
-        <div class="atlas-slice"><span id="atlas-z-label"></span><div class="seg" id="atlas-z" role="group"></div></div>
-        <div class="atlas-map">
-          <div class="atlas-ylabel" id="atlas-y-label" aria-hidden="true"></div>
-          <div class="atlas-grid" id="atlas-grid" role="group" aria-label="Map of worlds. Arrow keys move between worlds."></div>
-          <div class="atlas-xlabel" id="atlas-x-label" aria-hidden="true"></div>
-        </div>
-        <p class="desc" id="atlas-info" aria-live="polite"></p>
+      <div class="atlas-slice"><span id="atlas-z-label"></span><div class="seg" id="atlas-z" role="group"></div></div>
+      <div class="atlas-map">
+        <div class="atlas-ylabel" id="atlas-y-label" aria-hidden="true"></div>
+        <div class="atlas-grid" id="atlas-grid" role="group" aria-label="Map of worlds. Arrow keys move between worlds."></div>
+        <div class="atlas-xlabel" id="atlas-x-label" aria-hidden="true"></div>
       </div>
-      <p class="note" id="group-note"></p>
+      <p class="desc" id="atlas-info" aria-live="polite"></p>
+      <p class="note" id="atlas-note"></p>
     </section>
 
     <section aria-label="Forces">
@@ -329,7 +289,7 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
 
     <section aria-label="View">
       <h2>View</h2>
-      <p class="note">Scroll or pinch to zoom. Shift-drag, right-drag or drag with two fingers to move around. Keys: space plays or pauses, comma and period change speed, plus and minus zoom, 0 fits the setup.</p>
+      <p class="note">Scroll or pinch to zoom. Shift-drag, right-drag or drag with two fingers to move around. Keys: space plays or pauses, comma and period change speed, plus and minus zoom, 0 fits the world.</p>
     </section>
 
     <section aria-label="Export">
@@ -350,24 +310,17 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
   const tctx = trail.getContext("2d");
   const $ = (id) => document.getElementById(id);
 
-  const luts = {};
-  for (const [name, hex] of Object.entries(DATA.cmaps)) {
-    const n = hex.length / 6, arr = [];
-    for (let i = 0; i < n; i++) arr.push([0, 2, 4].map((k) => parseInt(hex.substr(i * 6 + k, 2), 16)));
-    luts[name] = arr;
-  }
-  const cmap = (name, t) => {
-    const lut = luts[name] || luts.hsv;
-    return lut[Math.max(0, Math.min(lut.length - 1, Math.round(t * (lut.length - 1))))];
-  };
+  const lut = [];
+  for (let i = 0; i < DATA.lut.length / 6; i++) lut.push([0, 2, 4].map((k) => parseInt(DATA.lut.substr(i * 6 + k, 2), 16)));
+  const hue = (t) => lut[Math.max(0, Math.min(lut.length - 1, Math.round(t * (lut.length - 1))))];
 
   // ---------------------------------------------------------------- state
   const BASE_STEPS = 10;     // simulation steps per screen frame at 1× speed
   const LIVE_FADE = 0.965;   // share of an older snapshot's ink left after each new one in Live mode
   const LIVE_KEEP = 160;     // snapshots kept for redraws in Live mode; older ones have faded out
   const BUCKETS = 128;       // colors per snapshot; dots of one color are filled together
-  const ui = { mode: "still", color: "time", group: "made", gScale: 1, cScale: 1, speed: 2, dot: 1.2, len: 1000, ringSp: 0 };
-  let setup = null;          // {name, p: [x,y,...], v: [...], species: [...] | null, rules, steps, half, cmap, desc}
+  const ui = { mode: "still", color: "time", gScale: 1, cScale: 1, speed: 2, dot: 1.2, len: 1000, ringSp: 0 };
+  let setup = null;          // {name, p: [x,y,...], v: [...], species: [...] | null, rules, steps, half, desc}; atlas worlds add cell, fitness, ...
   let eco = null;            // rules in force: {S, pull, push, colors, note}; pull[a][b] scales how a reacts to b
   let ecoKey = "";           // preset they came from, "b:<name>" built in or "s:<name>" saved; "" once edited
   let sim = null;            // live arrays
@@ -529,7 +482,7 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
     paths.forEach((path, b) => {
       if (bySpecies) tctx.fillStyle = eco.colors[b];
       else {
-        const c = cmap(setup.cmap, b / (BUCKETS - 1));
+        const c = hue(b / (BUCKETS - 1));
         tctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
       }
       tctx.fill(path);
@@ -624,11 +577,10 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
   function describe() {
     const parts = [setup.name];
     if (setup.desc) parts.push(setup.desc);
-    if (setup.score != null) parts.push(`score ${setup.score.toFixed(2)}`);
     if (setup.fitness != null) parts.push(`fitness ${setup.fitness.toFixed(2)}`);
     $("setup-desc").textContent = parts.join(" · ");
-    document.querySelectorAll(".thumb, .cell").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.name === setup.name)));
-    if (atlas && ui.group === "atlas") atlasInfo(null);
+    document.querySelectorAll(".cell").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.name === setup.name)));
+    atlasInfo(null);
   }
 
   // ------------------------------------------------------------ random
@@ -693,7 +645,7 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
     centre(p, v);
     let ext = 0;
     for (let i = 0; i < p.length; i++) ext = Math.max(ext, Math.abs(p[i]));
-    return { name: `random ${seed}`, desc: desc.join(", "), p, v, steps: 1000, half: Math.max(14, ext * 1.5), cmap: "hsv" };
+    return { name: `random ${seed}`, desc: desc.join(", "), p, v, steps: 1000, half: Math.max(14, ext * 1.5) };
   }
   function centre(p, v) {
     const n = p.length / 2;
@@ -702,42 +654,6 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
     for (let i = 0; i < n; i++) { mx += p[2 * i]; my += p[2 * i + 1]; mvx += v[2 * i]; mvy += v[2 * i + 1]; }
     for (let i = 0; i < n; i++) { p[2 * i] -= mx / n; p[2 * i + 1] -= my / n; v[2 * i] -= mvx / n; v[2 * i + 1] -= mvy / n; }
   }
-
-  // ---------------------------------------------------------- controls
-  function buildThumbs() {
-    const box = $("thumbs");
-    box.textContent = "";
-    for (const s of DATA.scenes.filter((s) => s.group === ui.group)) {
-      const b = document.createElement("button");
-      b.className = "thumb";
-      b.dataset.name = s.name;
-      b.setAttribute("aria-pressed", String(setup && setup.name === s.name));
-      b.title = s.desc || s.name;
-      const img = document.createElement("img");
-      img.src = s.thumb; img.alt = "";
-      const label = document.createElement("span");
-      label.textContent = s.name;
-      b.append(img, label);
-      b.addEventListener("click", () => { playing = true; loadSetup(s); });
-      box.append(b);
-    }
-    $("group-note").textContent = {
-      made: "Setups designed by hand. The first is the original notebook's spiral.",
-      eco: "Ecosystems: the same physics with species. Each one loads its rules into the Ecosystem panel below.",
-      found: "Picked by search.py from 800 random setups, scored on how much of the frame they fill, symmetry, smooth motion, and how few particles fly off.",
-      atlas: atlas && `An atlas of possible worlds: atlas.py simulated ${atlas.evaluations.toLocaleString("en")} setups with MAP-Elites and kept the best-drawn one in every cell of this map: k-fold symmetric, fine-grained trails, few particles flying off, and runs that keep developing. Each world brings its own forces and species rules. Choose two axes for the grid; the third slices it.`,
-    }[ui.group];
-  }
-  function setTab(group) {
-    ui.group = group;
-    for (const g of ["made", "eco", "found", "atlas"]) $("tab-" + g).setAttribute("aria-selected", String(group === g));
-    $("thumbs").hidden = group === "atlas";
-    $("atlas").hidden = group !== "atlas";
-    document.querySelector(".app").classList.toggle("wide", group === "atlas");
-    if (group === "atlas") buildAtlas();
-    buildThumbs();
-  }
-  for (const g of ["made", "eco", "found", "atlas"]) $("tab-" + g).onclick = () => setTab(g);
 
   // ------------------------------------------------------------- atlas
   // DATA.atlas: {axes: [{name, label, bins, edges}], evaluations, elites: [{cell, features, fitness, ...setup}]}.
@@ -760,7 +676,7 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
     return `${e.desc} · fitness ${e.fitness.toFixed(2)} · ${f}${forces}${species} · ${origin}`;
   }
   function atlasInfo(e) {
-    const current = setup && setup.group === "atlas" ? setup : null;
+    const current = setup && setup.cell ? setup : null;
     const w = e || current;
     $("atlas-info").textContent = w ? `${w.name}: ${worldText(w)}` : "Hover over or focus a world to read about it; click it to run it.";
   }
@@ -820,36 +736,35 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
     Object.assign(at, { x, y, z });
     buildAtlas();
   }
-  if (atlas) {
-    for (const e of atlas.elites) { e.p = float64s(e.pb); e.v = float64s(e.vb); }
-    for (const id of ["atlas-x", "atlas-y"]) atlas.axes.forEach((a, i) => $(id).append(new Option(a.label, i)));
-    $("atlas-x").addEventListener("change", (e) => setAxes(+e.target.value, at.y === +e.target.value ? at.x : at.y));
-    $("atlas-y").addEventListener("change", (e) => setAxes(at.x === +e.target.value ? at.y : at.x, +e.target.value));
-    $("atlas-z").addEventListener("click", (e) => {
-      const b = e.target.closest("button");
-      if (!b) return;
-      at.slice = b.dataset.v === "all" ? "all" : +b.dataset.v;
-      buildAtlas();
-      const again = $("atlas-z").querySelector(`[data-v="${b.dataset.v}"]`);
-      if (again) again.focus();
-    });
-    // arrow keys move to the nearest world in that direction, skipping empty cells
-    $("atlas-grid").addEventListener("keydown", (e) => {
-      const step = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
-      const from = e.target.closest(".cell");
-      if (!step || !from) return;
-      e.preventDefault();
-      let x = +from.dataset.x, y = +from.dataset.y;
-      for (;;) {
-        x += step[0]; y += step[1];
-        const next = $("atlas-grid").querySelector(`[data-x="${x}"][data-y="${y}"]`);
-        if (!next) return;
-        if (next.classList.contains("cell")) { next.focus(); return; }
-      }
-    });
-    $("tab-atlas").hidden = false;
-  }
+  for (const e of atlas.elites) { e.p = float64s(e.pb); e.v = float64s(e.vb); }
+  for (const id of ["atlas-x", "atlas-y"]) atlas.axes.forEach((a, i) => $(id).append(new Option(a.label, i)));
+  $("atlas-x").addEventListener("change", (e) => setAxes(+e.target.value, at.y === +e.target.value ? at.x : at.y));
+  $("atlas-y").addEventListener("change", (e) => setAxes(at.x === +e.target.value ? at.y : at.x, +e.target.value));
+  $("atlas-z").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    at.slice = b.dataset.v === "all" ? "all" : +b.dataset.v;
+    buildAtlas();
+    const again = $("atlas-z").querySelector(`[data-v="${b.dataset.v}"]`);
+    if (again) again.focus();
+  });
+  // arrow keys move to the nearest world in that direction, skipping empty cells
+  $("atlas-grid").addEventListener("keydown", (e) => {
+    const step = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
+    const from = e.target.closest(".cell");
+    if (!step || !from) return;
+    e.preventDefault();
+    let x = +from.dataset.x, y = +from.dataset.y;
+    for (;;) {
+      x += step[0]; y += step[1];
+      const next = $("atlas-grid").querySelector(`[data-x="${x}"][data-y="${y}"]`);
+      if (!next) return;
+      if (next.classList.contains("cell")) { next.focus(); return; }
+    }
+  });
+  $("atlas-note").textContent = `atlas.py simulated ${atlas.evaluations.toLocaleString("en")} setups with MAP-Elites and kept the best-drawn world in each of the ${atlas.elites.length} cells of this map it filled: k-fold symmetric, fine-grained trails, few particles flying off, and runs that keep developing. Each world brings its own forces and species rules. Choose two axes for the grid; the third slices it.`;
 
+  // ---------------------------------------------------------- controls
   function pick(id, key, v) {
     ui[key] = v;
     $(id).querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.v === String(v))));
@@ -1126,7 +1041,7 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
   };
   $("clear").onclick = () => {
     playing = true;
-    loadSetup({ name: "your setup", desc: "Click the canvas to add rings.", p: [], v: [], species: [], steps: 1200, half: 24, cmap: "hsv" },
+    loadSetup({ name: "your setup", desc: "Click the canvas to add rings.", p: [], v: [], species: [], steps: 1200, half: 24 },
       { keepRules: true });
   };
   document.addEventListener("keydown", (e) => {
@@ -1209,7 +1124,8 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
     ringPts(add, n, r, cx, cy, spin, 0, 0, vx, vy);
     const k = Math.min(ui.ringSp, eco.S - 1);
     if (ui.mode === "still") {
-      const base = setup.name.startsWith("your") ? setup : { ...setup, name: "your setup", desc: `${setup.name} plus your rings`, score: null };
+      const base = setup.name.startsWith("your") ? setup
+        : { ...setup, name: "your setup", desc: `${setup.name} plus your rings`, cell: null, fitness: null };
       const species = (setup.species || new Array(setup.p.length / 2).fill(0)).concat(new Array(n).fill(k));
       playing = true;
       loadSetup({ ...base, p: setup.p.concat(add.p), v: setup.v.concat(add.v), species },
@@ -1249,8 +1165,8 @@ select, input[type="text"] { font: inherit; color: var(--ink); background: var(-
 
   notes();
   spacing();
-  setTab("made");
-  loadSetup(DATA.scenes[0]);
+  buildAtlas();
+  loadSetup(atlas.elites.reduce((a, b) => (b.fitness > a.fitness ? b : a)));   // start on the fittest world
   requestAnimationFrame(frame);
 })();
 </script>
