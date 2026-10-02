@@ -1,0 +1,818 @@
+<title>How Particular Works</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a lab notebook. One reading column of prose; figure plates of looping clips break out wider; the atlas explorer closes the page. */
+:root {
+  --bg: #0e1117; --panel: #151a22; --line: #262d3a; --ink: #e7e9ee; --muted: #98a0b0;
+  --teal: #5fd0bf; --amber: #e3a75c; --plate: #04060a;
+  --s-random: #c9822f; --s-me: #22a08e; --bar-off: #3a4252; --grid: #222937;
+  --f-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f6f5f1; --panel: #ffffff; --line: #dcd9d0; --ink: #1a1d24; --muted: #5d6472;
+    --teal: #0b7464; --amber: #9a540f; --plate: #05070a;
+    --s-random: #b06418; --s-me: #0d8a76; --bar-off: #cfccc3; --grid: #e6e3db;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #f6f5f1; --panel: #ffffff; --line: #dcd9d0; --ink: #1a1d24; --muted: #5d6472;
+  --teal: #0b7464; --amber: #9a540f; --plate: #05070a;
+  --s-random: #b06418; --s-me: #0d8a76; --bar-off: #cfccc3; --grid: #e6e3db;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 18px; line-height: 1.6; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 80px; }
+.prose { max-width: 66ch; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; line-height: 1.1; margin: 0; }
+h1 { font-size: clamp(2.6rem, 7vw, 4.4rem); font-weight: 700; letter-spacing: -0.03em; }
+h2 { font-size: clamp(1.7rem, 4vw, 2.3rem); font-weight: 700; letter-spacing: -0.02em; }
+h3 { font-size: 1.2rem; font-weight: 500; margin-top: 1.6em; }
+p { margin: 0.8em 0; }
+a { color: var(--teal); }
+code, .mono { font-family: var(--f-mono); font-size: 0.82em; }
+code { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 0 0.3em; }
+pre { font-family: var(--f-mono); font-size: 13.5px; line-height: 1.55; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; overflow-x: auto; margin: 1em 0; }
+pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+.eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 1.22rem; color: var(--ink); max-width: 60ch; }
+.muted { color: var(--muted); }
+.nums { font-variant-numeric: tabular-nums; }
+
+header.top { display: grid; gap: 18px; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+nav.toc { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--f-mono); font-size: 13px; }
+nav.toc a { color: var(--muted); text-decoration: none; }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--teal); }
+nav.toc b { color: var(--teal); font-weight: 600; margin-right: 4px; }
+
+section { padding-top: 64px; }
+.sec-head { display: grid; gap: 8px; margin-bottom: 8px; }
+.sec-num { font-family: var(--f-mono); font-size: 13px; color: var(--teal); }
+
+/* clip plates */
+.plates { display: grid; gap: 14px; margin: 22px 0 8px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.plates.two { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); max-width: 820px; }
+.mutgrid { display: grid; gap: 14px; margin: 22px 0 8px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 3fr); align-items: start; }
+.mutgrid .kids { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 720px) { .mutgrid { grid-template-columns: minmax(0, 1fr); } .mutgrid .kids { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+figure { margin: 0; min-width: 0; }
+.clip { display: grid; gap: 8px; align-content: start; }
+.clip .vid { position: relative; background: var(--plate); border-radius: 6px; overflow: hidden; aspect-ratio: 1; max-width: 100%; cursor: pointer; }
+.clip video { width: 100%; height: 100%; display: block; object-fit: cover; }
+.clip .state { position: absolute; right: 8px; bottom: 8px; font-family: var(--f-mono); font-size: 11px; color: #c9cfdb; background: rgba(0,0,0,0.55); padding: 2px 7px; border-radius: 3px; pointer-events: none; }
+.clip .vid:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.clip figcaption { font-size: 15px; line-height: 1.45; color: var(--muted); }
+.clip figcaption b { color: var(--ink); font-family: var(--f-display); font-weight: 500; font-size: 16px; }
+.cell-tag { font-family: var(--f-mono); font-size: 12px; color: var(--teal); white-space: nowrap; }
+.vals { display: block; font-family: var(--f-mono); font-size: 12px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.note { font-size: 15px; color: var(--muted); border-left: 2px solid var(--line); padding-left: 14px; margin: 18px 0; max-width: 66ch; }
+
+/* math: TeX rendered to SVG at build time (MathJax); glyphs use currentColor */
+.math { display: inline; }
+.math svg { display: inline-block; }
+.math-d { color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px 20px; overflow-x: auto; margin: 1em 0; max-width: 820px; font-size: 17px; }
+.math-d .math { display: block; width: max-content; margin: 0 auto; }
+@media (max-width: 520px) { .math-d { padding: 12px 8px; font-size: 14px; } }
+/* formula block */
+.formula { font-family: var(--f-mono); font-size: 15px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 18px; overflow-x: auto; white-space: pre; margin: 1em 0; max-width: 820px; }
+
+/* tables */
+.tablewrap { overflow-x: auto; margin: 18px 0; max-width: 100%; }
+table { border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; min-width: 100%; }
+th, td { text-align: left; padding: 7px 12px 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--f-mono); font-weight: 400; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+td.n, th.n { text-align: right; padding-right: 16px; }
+td code { white-space: nowrap; }
+tr.hl td { color: var(--teal); }
+
+.species-demo { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 24px; align-items: start; margin: 22px 0 8px; max-width: 980px; }
+@media (max-width: 720px) { .species-demo { grid-template-columns: minmax(0, 1fr); } }
+.legend-row { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-bottom: 6px; color: var(--ink); }
+/* figures with images */
+.pair { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); max-width: 820px; margin: 20px 0; }
+.pair img { width: 100%; height: auto; aspect-ratio: 1; display: block; border-radius: 6px; background: var(--plate); image-rendering: pixelated; }
+.pair figcaption { font-size: 14px; color: var(--muted); margin-top: 6px; }
+.key { display: inline-flex; align-items: center; gap: 6px; margin-right: 14px; }
+.sw { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+
+/* steps of the loop */
+ol.loop { list-style: none; padding: 0; margin: 20px 0; display: grid; gap: 10px; max-width: 820px; counter-reset: step; }
+ol.loop li { counter-increment: step; display: grid; grid-template-columns: 2.2em 1fr; gap: 10px; align-items: baseline; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 16px; }
+ol.loop li::before { content: counter(step); font-family: var(--f-mono); color: var(--teal); font-size: 14px; }
+ol.loop li > div { min-width: 0; }
+
+/* charts */
+.chart { margin: 20px 0; max-width: 820px; }
+.chart > svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { fill: var(--muted); font-family: var(--f-mono); font-size: 11px; }
+.chart .lbl { fill: var(--ink); }
+.chart .axis { stroke: var(--line); }
+.chart .gridl { stroke: var(--grid); }
+.chart-title { font-family: var(--f-display); font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+.chart-sub { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 18px; font-family: var(--f-mono); font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.small-multiples { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); max-width: 900px; margin: 20px 0; }
+.tip { position: fixed; pointer-events: none; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 5px; padding: 6px 9px; font-family: var(--f-mono); font-size: 12px; line-height: 1.4; box-shadow: 0 4px 16px rgba(0,0,0,0.25); z-index: 10; max-width: 260px; }
+
+/* axis strips (classification) */
+.strips { display: grid; gap: 14px; max-width: 820px; margin: 20px 0; }
+.strip-label { font-family: var(--f-mono); font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+
+/* explorer */
+.explorer { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); gap: 24px; margin-top: 22px; align-items: start; }
+@media (max-width: 820px) { .explorer { grid-template-columns: minmax(0, 1fr); } }
+.slices { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; font-family: var(--f-mono); font-size: 13px; }
+.slices button { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+.slices button[aria-pressed="true"] { border-color: var(--teal); color: var(--teal); }
+.slices button:focus-visible, .tile:focus-visible, .linkbtn:focus-visible { outline: 2px solid var(--teal); outline-offset: 1px; }
+.gridwrap { display: grid; grid-template-columns: 22px minmax(0, 1fr); grid-template-rows: auto 22px; gap: 4px; }
+.yaxis { writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--f-mono); font-size: 11px; color: var(--muted); text-align: center; }
+.xaxis { grid-column: 2; font-family: var(--f-mono); font-size: 11px; color: var(--muted); text-align: center; }
+.agrid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 2px; background: var(--line); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.tile { aspect-ratio: 1; border: 0; padding: 0; margin: 0; background-color: var(--plate); background-image: url("figs/atlas-sprite.jpg"); background-size: 2000% 1900%; cursor: pointer; position: relative; }
+.tile.empty { background-image: none; background: var(--panel); cursor: default; }
+.tile[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--teal); }
+.tile.parent { box-shadow: inset 0 0 0 2px var(--amber); }
+.detail { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 10px; font-size: 15px; }
+.detail .big { aspect-ratio: 1; width: 100%; border-radius: 4px; background-color: var(--plate); background-image: url("figs/atlas-sprite.jpg"); background-size: 2000% 1900%; }
+.detail dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: 14px; }
+.detail dt { font-family: var(--f-mono); font-size: 12px; color: var(--muted); padding-top: 2px; }
+.detail dd { margin: 0; font-variant-numeric: tabular-nums; min-width: 0; overflow-wrap: anywhere; }
+.linkbtn { font: inherit; font-family: var(--f-mono); font-size: 13px; color: var(--amber); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+.meter { height: 6px; background: var(--grid); border-radius: 3px; overflow: hidden; margin-top: 4px; }
+.meter i { display: block; height: 100%; background: var(--s-me); border-radius: 3px; }
+
+footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 15px; color: var(--muted); max-width: 66ch; }
+@media (max-width: 520px) { body { font-size: 17px; } .wrap { padding-inline: 16px; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">ssteeper/particular · explainer</div>
+  <h1>How Particular works</h1>
+  <p class="lede">Particles pull on each other at long range and push apart up close. Draw where they go and you get trails. This page explains that simulation, and then how <code>atlas.py</code> searches through 300,000 simulated worlds and keeps the best one of each kind on a map with 384 cells.</p>
+  <div class="plates" id="hero">
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/elite-4-4-5.mp4" poster="clips/elite-4-4-5.jpg" muted loop playsinline preload="none" aria-label="Atlas world in cell 4,4,5: a starburst of straight rays"></video><span class="state">paused</span></div>
+      <figcaption><b>A starburst</b> · atlas cell <span class="cell-tag">(4, 4, 5)</span>, the most branching slice.</figcaption></figure>
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/scene-eco_orbit.mp4" poster="clips/scene-eco_orbit.jpg" muted loop playsinline preload="none" aria-label="The eco_orbit scene: two rings orbit a heavy core"></video><span class="state">paused</span></div>
+      <figcaption><b>Three species</b> · the hand-built <code>eco_orbit</code> scene: a heavy core with two rings orbiting it.</figcaption></figure>
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/elite-2-7-1.mp4" poster="clips/elite-2-7-1.jpg" muted loop playsinline preload="none" aria-label="Atlas world in cell 2,7,1: dense five-fold petals"></video><span class="state">paused</span></div>
+      <figcaption><b>Dense petals</b> · atlas cell <span class="cell-tag">(2, 7, 1)</span>, the densest row.</figcaption></figure>
+  </div>
+  <nav class="toc" aria-label="Sections">
+    <a href="#physics"><b>1</b>Physics</a>
+    <a href="#species"><b>2</b>Species</a>
+    <a href="#genome"><b>3</b>Genome</a>
+    <a href="#measure"><b>4</b>Measuring</a>
+    <a href="#classify"><b>5</b>Classifying</a>
+    <a href="#fitness"><b>6</b>Fitness</a>
+    <a href="#mapelites"><b>7</b>MAP-Elites</a>
+    <a href="#mutation"><b>8</b>Mutation</a>
+    <a href="#results"><b>9</b>Results</a>
+    <a href="#explore"><b>10</b>Explore the atlas</a>
+  </nav>
+</header>
+
+<section id="physics">
+  <div class="sec-head"><span class="sec-num">1 · particular.py</span><h2>The physics</h2></div>
+  <div class="prose">
+    <p>Every particle feels every other particle. Particle \(i\) is accelerated by particle \(j\) along the line between them, with an attractive term that falls off as \(1/r^2\) and a repulsive term that falls off as \(1/r^3\):</p>
+  </div>
+  $$\begin{gathered} \mathbf{a}_i = \sum_{j \ne i} \left( -\frac{G\,\mathrm{pull}_{s_i s_j}}{r_{ij}^{2}} + \frac{C\,\mathrm{push}_{s_i s_j}}{r_{ij}^{3}} \right) \frac{\mathbf{r}_i - \mathbf{r}_j}{r_{ij}} \\[4pt] G = 5 \times 10^{6}, \qquad C = 10^{7} \end{gathered}$$
+  <div class="prose">
+    <p>Here \(r_{ij}\) is the distance between the two particles and \(s_i\) is particle \(i\)'s species; with one species both multipliers are 1. Far apart, the \(1/r^2\) pull wins and particles fall together. Close together, the \(1/r^3\) push wins and they bounce apart. The two cancel at \(r = C/G = 2\) units, so a pair settles about 2 units apart. The pull is strongest at \(r = 3\). With the species multipliers from section 2 the rest distance becomes \(2\,\mathrm{push}/\mathrm{pull}\).</p>
+  </div>
+  <div class="chart" id="forceChart">
+    <div class="chart-title">Force between two particles, by distance</div>
+    <div class="chart-sub">Positive pushes apart, negative pulls together. \(G = 1\), \(C = 2\) here, the same ratio as the code. The push near \(r = 1\) goes off the top of the chart.</div>
+  </div>
+  <div class="prose">
+    <p><code>simulate()</code> computes all pairwise differences at once with numpy, then takes a semi-implicit Euler step (update velocity from acceleration, then position from the new velocity) with \(\Delta t = 10^{-5}\):</p>
+  </div>
+  $$\mathbf{v}_i \leftarrow \mathbf{v}_i + \mathbf{a}_i\,\Delta t, \qquad \mathbf{r}_i \leftarrow \mathbf{r}_i + \mathbf{v}_i\,\Delta t$$
+  <div class="prose">
+    <p> It logs positions every 10 steps, so a 1400-step run gives 140 frames of shape <span class="mono">(n, 2)</span>.</p>
+    <p>The picture is every logged position drawn as a dot. Color follows time through a hue wheel, and opacity fades from 1 at the start to 0 at the end. Early motion therefore reads strongest, and the last frames are faint. Every still, video and score in the project uses this same fade.</p>
+  </div>
+  <div class="plates two">
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/scene-spiral.mp4" poster="clips/scene-spiral.jpg" muted loop playsinline preload="none" aria-label="The spiral scene"></video><span class="state">paused</span></div>
+      <figcaption><b>spiral</b> · the notebook's original start: 50 particles on a ring of radius 15, spinning. The ring falls inward and the spin turns the fall into a spiral.</figcaption></figure>
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/scene-breath.mp4" poster="clips/scene-breath.jpg" muted loop playsinline preload="none" aria-label="The breath scene"></video><span class="state">paused</span></div>
+      <figcaption><b>breath</b> · 60 particles on a small ring, kicked outward with a little spin. Attraction slows them, stops them and pulls them back.</figcaption></figure>
+  </div>
+  <p class="note">The clips on this page were rendered for this explainer. Each world was re-run on a CPU with positions logged every 5 steps instead of 10 so the motion is smooth, and drawn the way <code>make_video.py</code> draws: fading trails with bright heads at the particles' current positions. The final frame of each clip is the full trail image.</p>
+  <div class="prose"><p><code>SCENES</code> holds 18 hand-built starting setups. <code>make_video.py</code> draws 14 of them in turn, with a soundtrack generated from the runs: each scene gets a chord, and a voice whose pitch rises as the particles pull together. This is a reduced copy of <code>video/particular.mp4</code>, with sound:</p></div>
+  <figure class="clip" style="max-width:540px;margin-top:16px">
+    <div class="vid" style="cursor:auto"><video src="clips/reel.mp4" poster="clips/reel.jpg" controls playsinline preload="none" aria-label="The project video: 14 scenes drawn in turn"></video></div>
+    <figcaption><b>particular.mp4</b> · 74 seconds, 14 scenes from simplest to most complex.</figcaption>
+  </figure>
+</section>
+
+<section id="species">
+  <div class="sec-head"><span class="sec-num">2 · ecosystems</span><h2>Species and their rules</h2></div>
+  <div class="prose">
+    <p>Particles can belong to species. A rule set gives two S×S matrices of multipliers: <code>pull[a][b]</code> and <code>push[a][b]</code> scale how a particle of species <i>a</i> reacts to one of species <i>b</i>. The matrices don't have to be symmetric, so species <i>a</i> can be drawn to <i>b</i> while <i>b</i> runs from <i>a</i>. A negative pull repels at long range.</p>
+    <p>The <code>orbit</code> preset has three species: a heavy core (gold), an inner ring (blue) and an outer ring (violet). The two rings follow the same rules, so the table groups them:</p>
+  </div>
+  <div class="species-demo">
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/scene-eco_orbit.mp4" poster="clips/scene-eco_orbit.jpg" muted loop playsinline preload="none" aria-label="The eco_orbit scene"></video><span class="state">paused</span></div>
+      <figcaption><b>eco_orbit</b> · 16 core particles, an inner ring of 28 and an outer ring of 44 going the other way. Each ring particle starts at the speed of a circular orbit around the core.</figcaption></figure>
+    <div class="tablewrap" style="margin:0">
+      <table>
+        <thead><tr><th>how this reacts…</th><th>…to this</th><th class="n">pull</th><th class="n">push</th><th>result</th></tr></thead>
+        <tbody>
+          <tr><td>core</td><td>core</td><td class="n">1</td><td class="n">1</td><td>holds together, 2 units apart</td></tr>
+          <tr><td>core</td><td>ring</td><td class="n">0.2</td><td class="n">1</td><td>barely feels the rings</td></tr>
+          <tr><td>ring</td><td>core</td><td class="n">6</td><td class="n">4</td><td>pulled in hard</td></tr>
+          <tr><td>ring</td><td>ring</td><td class="n">0.1</td><td class="n">0.2</td><td>barely feels other ring particles</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:16px">The rings feel the core's pull 30 times more strongly than the core feels theirs (6 against 0.2). The core stays near the middle, and the rings circle it because their sideways speed balances the pull. Without that speed they would fall straight in.</p>
+    </div>
+  </div>
+  <div class="prose"><p>Hand-built scenes color trails by species. The atlas stills and the atlas clips below color by time, like the classic scenes, even when a world has several species.</p></div>
+</section>
+
+<section id="genome">
+  <div class="sec-head"><span class="sec-num">3 · random_genome, build</span><h2>A world as a genome</h2></div>
+  <div class="prose">
+    <p>The search needs worlds it can draw at random and then change a little. A world is stored as a <b>genome</b>: a small JSON dict. <code>build(genome)</code> turns it into particle positions, velocities, species and force constants, and depends on nothing but the genome. The genome holds:</p>
+    <ul>
+      <li><b>k</b>, a symmetry order from 1 to 6.</li>
+      <li><b>pieces</b>, 1 to 3 of them, each a ring, a set of satellites or a set of spokes with its own parameters. Satellites and spokes are repeated k times around the center.</li>
+      <li><b>log2_pull, log2_push</b>, global force scales in log2 units from −2 to 2, so G and C can each be scaled from ¼× to 4×.</li>
+      <li><b>species</b>, 1 to 3, and their <b>log2_rules</b> matrices, also from −2 to 2. Each piece names two species and alternates between them.</li>
+      <li><b>steps</b>, the run length: 400 to 1400 in steps of 200. <code>atlas.py</code> adds this one.</li>
+    </ul>
+  </div>
+  <div class="plates">
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/random-275.mp4" poster="clips/random-275.jpg" muted loop playsinline preload="none" aria-label="A world made of one ring"></video><span class="state">paused</span></div>
+      <figcaption><b>ring</b> · n, radius, spin, radial kick, phase. This ring of 60 starts with an outward kick, so every particle draws a straight ray.</figcaption></figure>
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/random-78.mp4" poster="clips/random-78.jpg" muted loop playsinline preload="none" aria-label="A world made of five satellite rings"></video><span class="state">paused</span></div>
+      <figcaption><b>satellites</b> · k small spinning rings at a distance, each with an orbit speed and an inward push. Here k = 5, 28 particles per ring.</figcaption></figure>
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/random-282.mp4" poster="clips/random-282.jpg" muted loop playsinline preload="none" aria-label="A world made of five spokes"></video><span class="state">paused</span></div>
+      <figcaption><b>spokes</b> · k lines of m particles from d0 to d1, with a bend, a swirl and a radial speed. Here k = 5, m = 10.</figcaption></figure>
+  </div>
+  <div class="prose">
+    <p>This is the genome of the atlas world in cell <span class="cell-tag">(6, 4, 3)</span>, which section 8 mutates. It has a ring of species 2 and two satellites of species 1:</p>
+  </div>
+<pre><code id="genomeJson"></code></pre>
+  <div class="prose">
+    <p><code>build()</code> also cleans up the result. Rings are capped so neighbors start at least 0.8 units apart (this satellite asks for 31 particles but gets 15). Particles that start within 0.3 of an earlier one are dropped. A world with more than 260 particles is thinned to 260 using the random state stored in <code>thin</code>, so the same genome always keeps the same particles. Finally the center of mass is moved to the origin and the mean velocity is subtracted, so nothing drifts out of frame.</p>
+  </div>
+</section>
+
+<section id="measure">
+  <div class="sec-head"><span class="sec-num">4 · measure()</span><h2>Measuring a world: three axes</h2></div>
+  <div class="prose">
+    <p>After a world runs, <code>measure()</code> reads its trajectory and returns three numbers that describe its behavior. These are the map's axes. It first picks a frame: the view half-width is 1.1 times the radius that contains 95% of the faded ink, the same rule the stills use. Measuring takes about 3 ms on one CPU core.</p>
+    <h3>Orderly → chaotic</h3>
+    <p>For every particle and frame, take the change in heading \(\Delta\theta\) from one logged step to the next. A turn of \(\pi\), where a particle reverses along a straight line, is folded back to 0, so a particle bouncing in and out along a ray counts as moving straight. The axis value is the mean turn, weighted by the fade \(w_t = 1 - t/(T-1)\):</p>
+  </div>
+  $$\text{chaos} = \frac{\sum_{t}\sum_{i=1}^{N} w_t \min\left(|\Delta\theta_{t,i}|,\ \pi - |\Delta\theta_{t,i}|\right)}{N \sum_t w_t}$$
+  <div class="prose">
+    <p> Calm orbits barely turn. Tangles turn sharply and often. Values span several decades, so this axis is binned on a log scale.</p>
+  </div>
+  <div class="plates two">
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/elite-0-5-0.mp4" poster="clips/elite-0-5-0.jpg" muted loop playsinline preload="none" aria-label="Orderly world"></video><span class="state">paused</span></div>
+      <figcaption><b>Orderly</b> <span class="cell-tag">(0, 5, 0)</span> · six spokes sweep round as rigid curves. <span class="vals">chaos 0.0078 rad/frame · density 0.47 · branching 0.07</span></figcaption></figure>
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/elite-7-5-0.mp4" poster="clips/elite-7-5-0.jpg" muted loop playsinline preload="none" aria-label="Chaotic world"></video><span class="state">paused</span></div>
+      <figcaption><b>Chaotic</b> <span class="cell-tag">(7, 5, 0)</span> · tight clusters tumble through each other while the rays around them stay straight. <span class="vals">chaos 0.18 rad/frame · density 0.41 · branching 0.03</span></figcaption></figure>
+  </div>
+  <div class="prose">
+    <h3>Sparse → dense</h3>
+    <p>Rasterize the faded ink onto a 48×48 grid and count the share of cells holding more than a quarter of the average ink per cell. The threshold keeps faint stray loops from counting. This is <code>search.py</code>'s fill score.</p>
+  </div>
+  <div class="plates two">
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/elite-2-0-1.mp4" poster="clips/elite-2-0-1.jpg" muted loop playsinline preload="none" aria-label="Sparse world"></video><span class="state">paused</span></div>
+      <figcaption><b>Sparse</b> <span class="cell-tag">(2, 0, 1)</span> · 42 particles in six short spokes, mostly empty frame. <span class="vals">chaos 0.014 · density 0.031 · branching 0.14</span></figcaption></figure>
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/elite-2-7-1.mp4" poster="clips/elite-2-7-1.jpg" muted loop playsinline preload="none" aria-label="Dense world"></video><span class="state">paused</span></div>
+      <figcaption><b>Dense</b> <span class="cell-tag">(2, 7, 1)</span> · five spokes of 14 sweep out overlapping petals that cover over half the frame. <span class="vals">chaos 0.016 · density 0.56 · branching 0.16</span></figcaption></figure>
+  </div>
+  <div class="prose">
+    <h3>Circular → branching</h3>
+    <p>This axis asks how much of the picture is lines pointing at the center. <code>measure()</code> draws the trails into a 128-pixel image, blurs it, and takes the brightness gradient at every pixel. A gradient that points along the radius belongs to an edge that runs around the center (a ring). A gradient at right angles to the radius belongs to an edge that runs out from the center (a ray).</p>
+    <p>The image is cut into polar cells: 16 rings by 32 sectors. Each cell scores its ray energy minus its ring energy. A cell only counts if that score stays positive over 5 consecutive rings in the same sector, so short ticks on a ring don't count and only long rays do. The axis value is the counted energy as a share of all edge energy. It is read at 128 pixels with 32 sectors and again at 32 pixels with 16 sectors, and the larger value is kept.</p>
+  </div>
+  <div class="pair">
+    <figure><img src="figs/ray-4-4-0-ink.png" alt="Trail image of a swirling world" width="384" height="384"><figcaption>Swirl, trail image</figcaption></figure>
+    <figure><img src="figs/ray-4-4-0.png" alt="Edge map of the swirl: almost all ring edges" width="384" height="384"><figcaption>Swirl edges · branching 0.02</figcaption></figure>
+    <figure><img src="figs/ray-4-4-5-ink.png" alt="Trail image of a starburst" width="384" height="384"><figcaption>Starburst, trail image</figcaption></figure>
+    <figure><img src="figs/ray-4-4-5.png" alt="Edge map of the starburst: ray edges with kept cells shaded" width="384" height="384"><figcaption>Starburst edges · branching 0.41</figcaption></figure>
+  </div>
+  <div class="note">
+    <div class="legend-row"><span class="key"><span class="sw" style="background:#e3a75c"></span>edges that run around the center</span><span class="key"><span class="sw" style="background:#5fd0bf"></span>edges that run out from the center</span></div>
+    The shaded disc on the starburst marks the polar cells that passed the five-ring test, 72% of them. The swirl has none. All four panels are the 128-pixel images the code reads.
+  </div>
+  <div class="plates two">
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/elite-4-4-0.mp4" poster="clips/elite-4-4-0.jpg" muted loop playsinline preload="none" aria-label="Circular world"></video><span class="state">paused</span></div>
+      <figcaption><b>Circular</b> <span class="cell-tag">(4, 4, 0)</span> · four spokes curl into arcs around the center. <span class="vals">chaos 0.041 · density 0.38 · branching 0.021</span></figcaption></figure>
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/elite-4-4-5.mp4" poster="clips/elite-4-4-5.jpg" muted loop playsinline preload="none" aria-label="Branching world"></video><span class="state">paused</span></div>
+      <figcaption><b>Branching</b> <span class="cell-tag">(4, 4, 5)</span> · six satellite rings fly apart into straight rays. <span class="vals">chaos 0.038 · density 0.35 · branching 0.41</span></figcaption></figure>
+  </div>
+  <p class="note">The rays have to point at the frame's center. In the chaotic world above, the rays fan out from two off-center clusters, so it scores 0.03 and sits in the most circular slice.</p>
+</section>
+
+<section id="classify">
+  <div class="sec-head"><span class="sec-num">5 · calibrate, cell_of</span><h2>Classifying: from three numbers to a cell</h2></div>
+  <div class="prose">
+    <p>The map is a 3D grid: 8 bins of chaos × 8 bins of density × 6 bins of branching, 384 cells. A world's cell is found by looking up each feature against that axis's bin edges (<code>np.searchsorted</code>).</p>
+    <p>The edges are fixed once, from replicate 0's random genomes. For each axis, <code>calibrate()</code> takes the 1st and 99th percentiles of those genomes' values and spaces the interior edges evenly between them. Chaos is spaced evenly in log space. The bins at each end are open, so an extreme value still lands in bin 0 or the last bin.</p>
+  </div>
+  <div class="strips" id="strips"></div>
+  <div class="prose">
+    <p>The amber marks are the world from section 3. Its branching value is 0.3183 and the edge between bins 3 and 4 is at 0.3186, so it lands in bin 3 by 0.0003. Cells are sharp boundaries on continuous values, and a small change to a world can move it to a neighboring cell. Section 8 shows this happening.</p>
+  </div>
+</section>
+
+<section id="fitness">
+  <div class="sec-head"><span class="sec-num">6 · measure() · fitness</span><h2>Fitness: how well a world is drawn</h2></div>
+  <div class="prose">
+    <p>Within a cell, worlds compete on fitness. Fitness is built only from things that are not axes, so it never prefers chaotic over orderly or dense over sparse. It is a product of four terms, each between 0 and 1:</p>
+  </div>
+  $$\begin{aligned} \text{fitness} = {} & \max(0,\ 1 - 2\,\text{escape}) \cdot (0.4 + 0.6\,\text{structure}) \\ & \cdot\, (0.4 + 0.6\,\text{crispness}) \cdot \left(\frac{T}{140}\right)^{0.2} \end{aligned}$$
+  <div class="prose">
+    <p>The 0.4 floors mean a world with no structure or no crispness keeps 40% of its score on that term instead of dropping to zero. Escape has no floor: if half the particles escape, fitness is 0. \(T\) is the number of logged frames.</p>
+    <h3>Structure: k-fold symmetry at large scale</h3>
+    <p>Bin the trail image into 16 radius rings by 64 angle sectors and take a Fourier transform around each ring. Summed over rings, \(E_m\) is the energy in harmonic \(m\): how much the ink repeats \(m\) times around the circle. Only harmonics 1 to 12 count, so the ripple of 60 separate particles on a ring earns nothing. For each \(k\) from 2 to 6, take the share of angular energy on multiples of \(k\), above the share \(p_k\) that chance would put there (the fraction of 1 to 12 that are multiples of \(k\)). Multiply the best of those by the share of all energy that is angular at all. \(A\) is the angular energy, and \(E_0\) is the energy that does not vary with angle:</p>
+  </div>
+  $$\begin{gathered} A = \sum_{m=1}^{12} E_m \\[6pt] S = \frac{A}{E_0 + A} \cdot \max\left(0,\ \max_{k=2,\dots,6} \frac{\frac{1}{A}\sum_{k \mid m} E_m - p_k}{1 - p_k}\right) \\[6pt] \text{structure} = 1 - e^{-S/0.3} \end{gathered}$$
+  <div class="prose">
+  </div>
+  <div class="small-multiples" id="spectra"></div>
+  <div class="plates two">
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/random-35.mp4" poster="clips/random-35.jpg" muted loop playsinline preload="none" aria-label="Two satellite rings, high structure"></video><span class="state">paused</span></div>
+      <figcaption><b>High structure</b> · two satellites. Energy sits on even harmonics, k = 2. <span class="vals">structure 0.92 · crisp 0.64 · fitness 0.67</span></figcaption></figure>
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/random-36.mp4" poster="clips/random-36.jpg" muted loop playsinline preload="none" aria-label="A single ring, no structure"></video><span class="state">paused</span></div>
+      <figcaption><b>No structure</b> · one ring looks the same from every angle, so there is nothing to repeat. <span class="vals">structure 0.00 · crisp 0.82 · fitness 0.28</span></figcaption></figure>
+  </div>
+  <div class="prose">
+    <h3>Crispness: thin separate lines</h3>
+    <p>Blur the 128-pixel trail image \(I\) with a 5×5 kernel and measure how much of the image's variance the blur removes. Thin separate trails lose most of their variance. Haze and blobs lose little. The share is mapped so 0.2 gives crispness 0 and 0.9 gives 1:</p>
+  </div>
+  $$\begin{gathered} d = 1 - \frac{\sum \left(\mathrm{blur}(I) - \bar I\right)^2}{\sum \left(I - \bar I\right)^2} \\[6pt] \text{crispness} = \mathrm{clip}\!\left(\frac{d - 0.2}{0.7},\ 0,\ 1\right) \end{gathered}$$
+  <div class="prose">
+    <h3>Escape and duration</h3>
+    <p>Escape is the share of particles that ever fly past \(1.6\,h\), where \(h\) is the frame's half-width. Duration \((T/140)^{0.2}\) favors longer runs: 400 steps (\(T = 40\)) scores 0.78 and 1400 steps (\(T = 140\)) scores 1.0, so the map prefers worlds that keep developing over a short initial burst.</p>
+  </div>
+  <div class="plates">
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/elite-2-0-1.mp4" poster="clips/elite-2-0-1.jpg" muted loop playsinline preload="none" aria-label="The fittest atlas world"></video><span class="state">paused</span></div>
+      <figcaption><b>Fittest in the atlas</b> <span class="cell-tag">(2, 0, 1)</span> · two-fold symmetric, very thin lines, nothing escapes. <span class="vals">structure 0.93 · crisp 0.93 · escape 0 · fitness 0.92</span></figcaption></figure>
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/random-3.mp4" poster="clips/random-3.jpg" muted loop playsinline preload="none" aria-label="A hazy tangle"></video><span class="state">paused</span></div>
+      <figcaption><b>Haze</b> · 198 particles tangle into a solid ball. <span class="vals">structure 0.01 · crisp 0.07 · escape 0.04 · fitness 0.17</span></figcaption></figure>
+    <figure class="clip"><div class="vid" tabindex="0"><video data-src="clips/random-271.mp4" poster="clips/random-271.jpg" muted loop playsinline preload="none" aria-label="A world where particles escape"></video><span class="state">paused</span></div>
+      <figcaption><b>Escape</b> · six satellites collapse and fling 41% of their particles out of frame. <span class="vals">structure 0.69 · crisp 0.59 · escape 0.41 · fitness 0.11</span></figcaption></figure>
+  </div>
+  <p class="note">Of 300 random genomes measured for this page, the median fitness was 0.27. The median elite in the published atlas is 0.75.</p>
+</section>
+
+<section id="mapelites">
+  <div class="sec-head"><span class="sec-num">7 · run_map_elites</span><h2>MAP-Elites: one champion per cell</h2></div>
+  <div class="prose">
+    <p><code>search.py</code>, the earlier approach, ranks random setups by a single weighted score. The research notes found that 11 of its top 16 were a single ring: one score converges on one kind of answer. MAP-Elites (Mouret &amp; Clune, 2015) keeps the best world in every cell of the behavior map instead, so the result is a variety of good worlds. The paper's main design lesson is to turn a preference into an axis rather than a fitness weight. That is why density and smoothness, which were weighted terms in <code>search.py</code>, are axes here.</p>
+    <p>The archive is a dict from cell to its elite. The loop:</p>
+  </div>
+  <ol class="loop">
+    <li><div><b>Seed.</b> Draw 2,000 random genomes, run and measure them, and put each in its cell. When two land in the same cell, the fitter one stays.</div></li>
+    <li><div><b>Select.</b> Pick a filled cell uniformly at random and copy its elite's genome. Every filled cell has the same chance, so a weak elite in a rare cell gets as much attention as a strong one in a crowded region.</div></li>
+    <li><div><b>Vary.</b> With probability 0.15, take one piece from the elite of another cell at most 2 cells away on every axis (crossover). Otherwise apply one mutation operator, chosen by weight. Section 8 lists them.</div></li>
+    <li><div><b>Evaluate and insert.</b> Run the child and measure it. It takes cell b(child) if that cell is empty or it beats the elite there. Then go back to step 2. A run does 48,000 children after the 2,000 seeds.</div></li>
+  </ol>
+  <div class="prose">
+    <p>The child often lands in a different cell from its parent. This is how the map fills: a cell's best world is often the child of an elite from a neighboring cell. The explorer in section 10 shows each elite's parent cell.</p>
+    <p>On a GPU, <code>gpu_sim.simulate_batch</code> runs a batch of 32 children at once in a single CUDA kernel, with four batches in flight, while a CPU pool builds setups and scores trajectories. Each batch is made from the archive as it is at that moment. On CPU, a process pool keeps 3 evaluations per worker queued and inserts results as they finish.</p>
+    <h3>The random-sampling control</h3>
+    <p>Each replicate first evaluates 50,000 purely random genomes, binned the same way. That is the control. MAP-Elites then runs for the same 50,000 evaluations, seeded with the first 2,000 of those random genomes. The published atlas ran 3 replicates of both: 300,000 simulations in 9 minutes on an RTX 5070 Ti. It keeps the best elite per cell across the three MAP-Elites runs.</p>
+  </div>
+</section>
+
+<section id="mutation">
+  <div class="sec-head"><span class="sec-num">8 · mutate</span><h2>Mutation: how a child differs from its parent</h2></div>
+  <div class="prose">
+    <p>Each operator changes one part of the genome. Gaussian steps are 6% of a gene's range for piece genes and 0.25 log2 units for forces and rules, clamped to range (angles wrap around). If a child ends up with fewer than 40 particles, <code>mutate</code> tries again, up to 20 times, and otherwise returns an unchanged copy, recorded as <code>none</code>.</p>
+  </div>
+  <div class="tablewrap">
+    <table id="opsTable">
+      <thead><tr><th>operator</th><th>what it changes</th><th class="n">share of children</th><th class="n">median move (bins)</th><th class="n">same cell</th><th class="n">within 1 cell</th><th class="n">inserted</th><th class="n">elites made</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <p class="note">Measured over all 48,000 children per replicate and averaged over the 3 replicates (<code>evaluation.locality</code> in <code>atlas.json</code>). "Median move" is the distance between parent and child features, in bin widths. For comparison, two unrelated random genomes are a median 4.47 bins apart and share a cell 1.5% of the time. "Elites made" counts which operator produced each of the 379 cells in the published atlas.</p>
+  <div class="prose">
+    <p>Small steps (forces, steps, one piece's genes) mostly stay close and do most of the work of improving a cell. Large steps (structure, crossover) jump across the map, usually more than two bins, and are inserted less often. Below, the parent from section 3 is given one child by each operator. These are the first valid sample per operator from a fixed seed, run and measured on CPU.</p>
+  </div>
+  <div class="mutgrid" id="mutants"><div id="mutParent"></div><div class="kids" id="mutKids"></div></div>
+</section>
+
+<section id="results">
+  <div class="sec-head"><span class="sec-num">9 · metrics</span><h2>Results: MAP-Elites against random sampling</h2></div>
+  <div class="prose">
+    <p>The paper's four metrics compare each run to the best fitness any run found in each cell, across all 6 runs (3 random, 3 MAP-Elites). 380 of the 384 cells were filled by at least one run.</p>
+    <ul>
+      <li><b>Coverage</b>: cells this run filled, out of the 380.</li>
+      <li><b>Reliability</b>: the mean over all 380 cells of this run's fitness divided by the best known, with empty cells counting 0. The main measure.</li>
+      <li><b>Precision</b>: the same mean, over only the cells this run filled.</li>
+      <li><b>Global</b>: this run's best world divided by the best world overall.</li>
+    </ul>
+  </div>
+  <div class="chart" id="metricsChart">
+    <div class="chart-title">Mean of 3 replicates, 50,000 evaluations each</div>
+    <div class="legend"><span class="key"><span class="sw" style="background:var(--s-random)"></span>random sampling</span><span class="key"><span class="sw" style="background:var(--s-me)"></span>MAP-Elites</span></div>
+  </div>
+  <div class="prose">
+    <p>Random sampling already finds 92% of the cells; MAP-Elites finds 98%. The bigger difference is quality within cells: reliability rises from 0.68 to 0.92. This matches what the research notes predicted from the paper: at a coarse grid, MAP-Elites helps more with quality per cell than with coverage.</p>
+  </div>
+  <p class="note">The worlds are chaotic. CPU and GPU round differently, so the same genome can end up with a slightly different picture on each. Of the 379 elites, 371 land in the same cell when re-run on CPU for this page. The measurements quoted in the clip captions are from the CPU re-runs.</p>
+</section>
+
+<section id="explore">
+  <div class="sec-head"><span class="sec-num">10 · search/atlas.json</span><h2>Explore the atlas</h2></div>
+  <div class="prose">
+    <p>Every filled cell of the published atlas. Chaos runs left to right, density bottom to top, and the buttons pick a branching slice, numbered like the third cell coordinate. <b>All</b> shows the fittest world over every slice. Select a world to see its numbers, and follow its parent cell to see where it came from. Empty squares are cells no run reached.</p>
+  </div>
+  <div class="explorer">
+    <div>
+      <div class="slices" role="group" aria-label="Branching slice" id="slices"><span class="muted">branching:</span></div>
+      <div class="gridwrap">
+        <div class="yaxis">sparse → dense</div>
+        <div class="agrid" id="agrid" role="grid" aria-label="Atlas cells"></div>
+        <div class="xaxis">orderly → chaotic</div>
+      </div>
+    </div>
+    <aside class="detail" id="detail" aria-live="polite"></aside>
+    <p class="muted" style="font-size:14px;margin:0;grid-column:1/-1"><span class="key"><span class="sw" style="box-shadow:inset 0 0 0 2px var(--teal)"></span>selected world</span><span class="key"><span class="sw" style="box-shadow:inset 0 0 0 2px var(--amber)"></span>its parent, when it is in view</span>Arrow keys move between worlds.</p>
+  </div>
+</section>
+
+<footer>
+  Built from the repository's own code and data: <code>particular.py</code>, <code>atlas.py</code>, <code>search/atlas.json</code> and the stills in <code>search/atlas/</code>. The clips were rendered for this page with the project's simulator. Paper: Mouret &amp; Clune, <i>Illuminating search spaces by mapping elites</i>, arXiv:1504.04909.
+</footer>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+/*DATA*/
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = (s, el = document) => el.querySelector(s);
+const NS = "http://www.w3.org/2000/svg";
+function svg(tag, attrs = {}, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const tip = $("#tip");
+function showTip(html, ev) {
+  tip.innerHTML = html; tip.hidden = false;
+  const x = Math.min(ev.clientX + 14, innerWidth - tip.offsetWidth - 8);
+  const y = Math.min(ev.clientY + 14, innerHeight - tip.offsetHeight - 8);
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip() { tip.hidden = true; }
+const fmt = (v, d = 2) => Number(v).toFixed(d);
+
+/* ---- mutation plates ---- */
+const MUT_TEXT = {
+  parent: ["Parent", "a ring (species 2) and two satellites (species 1), 1200 steps"],
+  piece: ["piece", "satellite genes nudged: orbit 99 → −79, spin −234 → −169, a few others"],
+  structure: ["structure", "satellites set to alternate spin direction copy by copy"],
+  forces: ["forces", "log2 pull −1.67 → −1.60, log2 push 0.24 → 0.18"],
+  species: ["species", "species 2 removed; the ring's particles join species 1 with the satellites"],
+  steps: ["steps", "run length 1200 → 1400"],
+  crossover: ["crossover", "satellites replaced by the satellites of the elite in cell (7, 5, 5)"],
+};
+(function mutants() {
+  const host = $("#mutants");
+  const p = DATA.mutants.parent;
+  for (const op of ["parent", "piece", "structure", "forces", "species", "steps", "crossover"]) {
+    const m = DATA.mutants[op];
+    const [title, text] = MUT_TEXT[op];
+    const moved = m.cell.map((c, i) => c !== p.cell[i]);
+    const cellHtml = "(" + m.cell.map((c, i) => moved[i] ? `<u>${c}</u>` : c).join(", ") + ")";
+    const df = m.fitness - p.fitness;
+    const fig = document.createElement("figure");
+    fig.className = "clip";
+    fig.innerHTML = `<div class="vid" tabindex="0"><video data-src="clips/mut-${op}.mp4" poster="clips/mut-${op}.jpg" muted loop playsinline preload="none" aria-label="${title}"></video><span class="state">paused</span></div>
+      <figcaption><b>${title}</b> <span class="cell-tag">${cellHtml}</span><br>${text}.
+      <span class="vals">fitness ${fmt(m.fitness)}${op === "parent" ? "" : ` (${df >= 0 ? "+" : "−"}${fmt(Math.abs(df))})`}</span></figcaption>`;
+    (op === "parent" ? $("#mutParent") : $("#mutKids")).appendChild(fig);
+  }
+})();
+
+/* ---- genome json ---- */
+(function genome() {
+  const g = JSON.parse(JSON.stringify(DATA.mutants.parent.genome));
+  const r = v => Math.round(v * 100) / 100;
+  for (const p of g.pieces) for (const k in p) if (typeof p[k] === "number" && !Number.isInteger(p[k])) p[k] = r(p[k]);
+  g.log2_pull = r(g.log2_pull); g.log2_push = r(g.log2_push);
+  for (const k of ["pull", "push"]) g.log2_rules[k] = g.log2_rules[k].map(row => row.map(r));
+  g.thin = ["…", "…", 0, "…"];
+  let s = JSON.stringify(g, null, 1);
+  s = s.replace(/\[\s+([^\[\]{}]*?)\s+\]/g, (m, inner) => "[" + inner.replace(/\s*\n\s*/g, " ") + "]");
+  s = s.replace(/\{\n\s+"kind"/g, '{"kind"');
+  $("#genomeJson").textContent = s + "\n// numbers rounded to 2 places here; the file stores full float64";
+})();
+
+/* ---- force chart ---- */
+(function forceChart() {
+  const host = $("#forceChart");
+  const W = 640, H = 260, L = 48, R = 14, T = 14, B = 34;
+  const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Force against distance: repulsive below 2 units, weakly attractive beyond, strongest pull at 3 units" }, host);
+  const r0 = 0.8, r1 = 8, y0 = -0.05, y1 = 0.1;
+  const X = r => L + (r - r0) / (r1 - r0) * (W - L - R);
+  const Y = f => T + (y1 - f) / (y1 - y0) * (H - T - B);
+  const F = r => -1 / (r * r) + 2 / (r * r * r);
+  for (const f of [-0.04, 0, 0.04, 0.08]) {
+    svg("line", { x1: L, x2: W - R, y1: Y(f), y2: Y(f), class: f === 0 ? "axis" : "gridl", "stroke-width": 1 }, s);
+    const t = svg("text", { x: L - 6, y: Y(f) + 4, "text-anchor": "end" }, s); t.textContent = f.toFixed(2);
+  }
+  for (const r of [1, 2, 3, 4, 5, 6, 7, 8]) {
+    const t = svg("text", { x: X(r), y: H - B + 16, "text-anchor": "middle" }, s); t.textContent = r;
+  }
+  const xl = svg("text", { x: (L + W - R) / 2, y: H - 4, "text-anchor": "middle" }, s); xl.textContent = "distance r (units)";
+  const defs = svg("defs", {}, s);
+  const cp = svg("clipPath", { id: "fc" }, defs); svg("rect", { x: L, y: T, width: W - L - R, height: H - T - B }, cp);
+  let d = "";
+  for (let i = 0; i <= 400; i++) { const r = r0 + (r1 - r0) * i / 400; d += (i ? "L" : "M") + X(r).toFixed(1) + "," + Y(F(r)).toFixed(1); }
+  svg("path", { d, fill: "none", stroke: "var(--teal)", "stroke-width": 2, "clip-path": "url(#fc)" }, s);
+  for (const [r, label, dy] of [[2, "rest: r = 2", -10], [3, "strongest pull: r = 3", 18]]) {
+    svg("circle", { cx: X(r), cy: Y(F(r)), r: 4, fill: "var(--amber)", stroke: "var(--bg)", "stroke-width": 2 }, s);
+    const t = svg("text", { x: X(r) + 8, y: Y(F(r)) + dy, class: "lbl" }, s); t.textContent = label;
+  }
+  const pushT = svg("text", { x: X(1.25) + 6, y: T + 12, class: "lbl" }, s); pushT.textContent = "push ↑";
+  const cross = svg("line", { y1: T, y2: H - B, stroke: "var(--muted)", "stroke-dasharray": "3 3", visibility: "hidden" }, s);
+  const dot = svg("circle", { r: 4, fill: "var(--teal)", stroke: "var(--bg)", "stroke-width": 2, visibility: "hidden" }, s);
+  const hit = svg("rect", { x: L, y: T, width: W - L - R, height: H - T - B, fill: "transparent" }, s);
+  hit.addEventListener("pointermove", ev => {
+    const box = s.getBoundingClientRect();
+    const px = (ev.clientX - box.left) / box.width * W;
+    const r = Math.max(r0, Math.min(r1, r0 + (px - L) / (W - L - R) * (r1 - r0)));
+    const f = F(r);
+    cross.setAttribute("x1", X(r)); cross.setAttribute("x2", X(r)); cross.setAttribute("visibility", "visible");
+    dot.setAttribute("cx", X(r)); dot.setAttribute("cy", Y(Math.min(f, y1))); dot.setAttribute("visibility", "visible");
+    showTip(`r = ${fmt(r)}<br>force = ${f.toFixed(4)}<br>${f > 0 ? "pushes apart" : "pulls together"}`, ev);
+  });
+  hit.addEventListener("pointerleave", () => { hideTip(); cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); });
+})();
+
+/* ---- axis strips ---- */
+(function strips() {
+  const host = $("#strips");
+  const p = DATA.mutants.parent;
+  DATA.axes.forEach((ax, i) => {
+    const log = ax.name === "chaos";
+    const e = ax.edges;
+    const tr = v => log ? Math.log(v) : v;
+    const step = tr(e[1]) - tr(e[0]);
+    const lo = tr(e[0]) - step, hi = tr(e[e.length - 1]) + step;
+    const W = 640, H = 58, L = 6, R = 6;
+    const X = v => L + (tr(v) - lo) / (hi - lo) * (W - L - R);
+    const wrap = document.createElement("div");
+    const lab = document.createElement("div"); lab.className = "strip-label";
+    lab.innerHTML = `<span>${ax.label} · ${ax.bins} bins${log ? " · log scale" : ""}</span><span>value ${p.features[i].toFixed(4)} → bin ${p.cell[i]}</span>`;
+    wrap.appendChild(lab);
+    const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${ax.label} bins; example value in bin ${p.cell[i]}` });
+    wrap.appendChild(s); s.style.width = "100%"; s.style.height = "auto"; s.style.display = "block";
+    const xs = [L, ...e.map(X), W - R];
+    for (let b = 0; b < ax.bins; b++) {
+      svg("rect", { x: xs[b] + 1, y: 8, width: Math.max(0, xs[b + 1] - xs[b] - 2), height: 22, rx: 3, fill: b === p.cell[i] ? "var(--s-me)" : "var(--bar-off)", opacity: b === p.cell[i] ? 0.55 : 0.6 }, s);
+      const t = svg("text", { x: (xs[b] + xs[b + 1]) / 2, y: 24, "text-anchor": "middle", style: "fill:var(--ink);font-family:var(--f-mono);font-size:11px" }, s); t.textContent = b;
+    }
+    e.forEach((v, j) => {
+      if (j % 2 === 0 || e.length < 7) { const t = svg("text", { x: X(v), y: 46, "text-anchor": "middle", style: "fill:var(--muted);font-family:var(--f-mono);font-size:10px" }, s); t.textContent = log ? v.toFixed(3) : v.toFixed(2); }
+      svg("line", { x1: X(v), x2: X(v), y1: 31, y2: 36, stroke: "var(--muted)" }, s);
+    });
+    const px = X(p.features[i]);
+    svg("path", { d: `M${px},4 l-5,-6 h10 z`, fill: "var(--amber)", transform: "translate(0,4)" }, s);
+    svg("line", { x1: px, x2: px, y1: 6, y2: 32, stroke: "var(--amber)", "stroke-width": 2 }, s);
+    host.appendChild(wrap);
+  });
+})();
+
+/* ---- spectra small multiples ---- */
+(function spectra() {
+  const host = $("#spectra");
+  const items = [["r36", "One ring", "almost no angular energy"], ["r35", "Two satellites", "even harmonics: k = 2"], ["r282", "Five spokes", "harmonics 5 and 10: k = 5"]];
+  const ymax = 0.4;
+  for (const [key, title, sub] of items) {
+    const d = DATA.spectra[key];
+    const box = document.createElement("div");
+    box.innerHTML = `<div class="chart-title">${title}</div><div class="chart-sub">${sub} · S = ${fmt(d.S, 3)} · structure ${fmt(d.structure)}</div>`;
+    const W = 300, H = 150, L = 34, R = 6, T = 8, B = 26;
+    const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `${title}: angular harmonic spectrum` }, box);
+    s.style.width = "100%"; s.style.height = "auto"; s.style.display = "block"; s.style.overflow = "visible";
+    const Y = v => T + (1 - Math.min(v, ymax) / ymax) * (H - T - B);
+    for (const v of [0, 0.2, 0.4]) {
+      svg("line", { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: v ? "var(--grid)" : "var(--line)" }, s);
+      const t = svg("text", { x: L - 5, y: Y(v) + 4, "text-anchor": "end", style: "fill:var(--muted);font-family:var(--f-mono);font-size:10px" }, s); t.textContent = v.toFixed(1);
+    }
+    const bw = (W - L - R) / 12;
+    d.harmonics.forEach((v, i) => {
+      const m = i + 1, on = d.k > 1 && m % d.k === 0;
+      const x = L + i * bw + 2, h = Math.max(0, Y(0) - Y(v));
+      if (h > 0.3) {
+        const top = Y(v), rr = Math.min(3, h / 2, (bw - 4) / 2);
+        svg("path", { d: `M${x},${Y(0)} V${top + rr} Q${x},${top} ${x + rr},${top} H${x + bw - 4 - rr} Q${x + bw - 4},${top} ${x + bw - 4},${top + rr} V${Y(0)} Z`, fill: on ? "var(--s-me)" : "var(--bar-off)" }, s);
+      }
+      const t = svg("text", { x: x + (bw - 4) / 2, y: H - B + 14, "text-anchor": "middle", style: "fill:var(--muted);font-family:var(--f-mono);font-size:10px" }, s); t.textContent = m;
+      const hit = svg("rect", { x: L + i * bw, y: T, width: bw, height: H - T - B, fill: "transparent" }, s);
+      hit.addEventListener("pointermove", ev => showTip(`harmonic ${m}<br>${(v * 100).toFixed(1)}% of energy${on ? `<br>multiple of k = ${d.k}` : ""}`, ev));
+      hit.addEventListener("pointerleave", hideTip);
+    });
+    const xl = svg("text", { x: (L + W - R) / 2, y: H - 2, "text-anchor": "middle", style: "fill:var(--muted);font-family:var(--f-mono);font-size:10px" }, s); xl.textContent = "harmonic m (repeats per turn)";
+    host.appendChild(box);
+  }
+  const cap = document.createElement("p"); cap.className = "note"; cap.style.gridColumn = "1 / -1"; cap.style.margin = "0";
+  cap.innerHTML = `Share of each world's trail-image energy in angular harmonics 1 to 12. Teal bars are multiples of the best k. The ring's energy is almost all in harmonic 0 (no variation with angle), which is why its angular share is 0.6%.`;
+  host.appendChild(cap);
+})();
+
+/* ---- ops table ---- */
+(function opsTable() {
+  const rows = [
+    ["piece", "one piece's genes, each by a Gaussian step (weight 0.45)"],
+    ["forces", "global log2 pull and push (0.15)"],
+    ["species", "nudge a rule matrix, reassign a piece's species, add or remove a species (0.15)"],
+    ["steps", "run length ±200 (0.15)"],
+    ["structure", "resample, add or remove a piece; k ± 1; flip satellite spin alternation (0.1)"],
+    ["crossover", "replace a piece with one from an elite ≤ 2 cells away (chance 0.15, checked first)"],
+    ["none", "no valid child in 20 tries; an unchanged copy"],
+  ];
+  const tb = $("#opsTable tbody");
+  const L = DATA.locality, made = DATA.elite_ops;
+  for (const [op, what] of rows) {
+    const l = L[op], share = l.children / L.all.children;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td><code>${op}</code></td><td>${what}</td><td class="n">${(share * 100).toFixed(0)}%</td><td class="n">${fmt(l.median_bins)}</td><td class="n">${(l.same_cell * 100).toFixed(0)}%</td><td class="n">${(l.within_1 * 100).toFixed(0)}%</td><td class="n">${(l.inserted * 100).toFixed(1)}%</td><td class="n">${made[op] || 0}</td>`;
+    tb.appendChild(tr);
+  }
+  const a = L.all, rp = L.random_pairs;
+  const tr = document.createElement("tr"); tr.className = "hl";
+  tr.innerHTML = `<td>all</td><td></td><td class="n">100%</td><td class="n">${fmt(a.median_bins)}</td><td class="n">${(a.same_cell * 100).toFixed(0)}%</td><td class="n">${(a.within_1 * 100).toFixed(0)}%</td><td class="n">${(a.inserted * 100).toFixed(1)}%</td><td class="n">379</td>`;
+  tb.appendChild(tr);
+  const tr2 = document.createElement("tr");
+  tr2.innerHTML = `<td class="muted">random pairs</td><td class="muted">two unrelated random genomes</td><td></td><td class="n muted">${fmt(rp.median_bins)}</td><td class="n muted">${(rp.same_cell * 100).toFixed(1)}%</td><td class="n muted">${(rp.within_1 * 100).toFixed(0)}%</td><td></td><td></td>`;
+  tb.appendChild(tr2);
+})();
+
+/* ---- metrics chart ---- */
+(function metricsChart() {
+  const host = $("#metricsChart");
+  const metrics = ["coverage", "reliability", "precision", "global"];
+  const W = 640, rowH = 46, L = 92, R = 44, T = 6, B = 24;
+  const H = T + metrics.length * rowH + B;
+  const s = svg("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Metrics: random sampling against MAP-Elites" }, host);
+  const X = v => L + v * (W - L - R);
+  for (const v of [0, 0.25, 0.5, 0.75, 1]) {
+    svg("line", { x1: X(v), x2: X(v), y1: T, y2: H - B, stroke: v ? "var(--grid)" : "var(--line)" }, s);
+    const t = svg("text", { x: X(v), y: H - 6, "text-anchor": "middle" }, s); t.textContent = v.toFixed(2);
+  }
+  metrics.forEach((m, i) => {
+    const y = T + i * rowH;
+    const t = svg("text", { x: L - 10, y: y + rowH / 2 + 3, "text-anchor": "end", class: "lbl" }, s); t.textContent = m;
+    [["random", "var(--s-random)", "random sampling"], ["map_elites", "var(--s-me)", "MAP-Elites"]].forEach(([k, c, name], j) => {
+      const v = DATA.metrics[k][m];
+      const by = y + 6 + j * 17, bh = 15, x0 = X(0), x1 = X(v), rr = 4;
+      svg("path", { d: `M${x0},${by} H${x1 - rr} Q${x1},${by} ${x1},${by + rr} V${by + bh - rr} Q${x1},${by + bh} ${x1 - rr},${by + bh} H${x0} Z`, fill: c }, s);
+      const vt = svg("text", { x: x1 + 5, y: by + 11, class: "lbl" }, s); vt.textContent = v.toFixed(2);
+      const hit = svg("rect", { x: x0, y: by - 1, width: X(1) - x0 + R, height: bh + 2, fill: "transparent" }, s);
+      const reps = DATA.per_rep[k].map(r => r[m].toFixed(3)).join(", ");
+      hit.addEventListener("pointermove", ev => showTip(`${name}<br>${m}: ${v.toFixed(3)}<br>replicates: ${reps}`, ev));
+      hit.addEventListener("pointerleave", hideTip);
+    });
+  });
+})();
+
+/* ---- atlas explorer ---- */
+(function explorer() {
+  const E = DATA.atlas;
+  const byCell = new Map(E.map((e, i) => [e.c.join(","), i]));
+  const COLS = 20, ROWS = 19;
+  const pos = i => `${(i % COLS) / (COLS - 1) * 100}% ${Math.floor(i / COLS) / (ROWS - 1) * 100}%`;
+  const grid = $("#agrid"), detail = $("#detail"), slicesEl = $("#slices");
+  let slice = "3", selected = null;
+  const labels = ["0", "1", "2", "3", "4", "5", "All"];
+  labels.forEach((lab, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = lab; b.dataset.z = i < 6 ? String(i) : "all";
+    b.setAttribute("aria-pressed", b.dataset.z === slice ? "true" : "false");
+    b.addEventListener("click", () => setSlice(b.dataset.z));
+    slicesEl.appendChild(b);
+  });
+  function at(x, y) {
+    if (slice !== "all") return byCell.get(`${x},${y},${slice}`);
+    let best;
+    for (let z = 0; z < 6; z++) { const i = byCell.get(`${x},${y},${z}`); if (i !== undefined && (best === undefined || E[i].f > E[best].f)) best = i; }
+    return best;
+  }
+  function setSlice(z) {
+    slice = z;
+    for (const b of slicesEl.querySelectorAll("button")) b.setAttribute("aria-pressed", b.dataset.z === z ? "true" : "false");
+    draw();
+  }
+  function draw() {
+    grid.innerHTML = "";
+    for (let y = 7; y >= 0; y--) for (let x = 0; x < 8; x++) {
+      const i = at(x, y);
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "tile";
+      b.dataset.x = x; b.dataset.y = y;
+      if (i === undefined) { b.classList.add("empty"); b.disabled = true; b.setAttribute("aria-label", `chaos ${x}, density ${y}: empty`); }
+      else {
+        b.style.backgroundPosition = pos(i);
+        b.setAttribute("aria-label", `cell ${E[i].c.join(", ")}, fitness ${E[i].f}`);
+        b.setAttribute("aria-pressed", i === selected ? "true" : "false");
+        if (selected !== null && E[selected].p && E[selected].p.join(",") === E[i].c.join(",") && i !== selected) b.classList.add("parent");
+        b.addEventListener("click", () => select(i));
+        b.addEventListener("pointerenter", ev => showTip(`(${E[i].c.join(", ")}) · fitness ${fmt(E[i].f)}<br>${E[i].d}`, ev));
+        b.addEventListener("pointermove", ev => showTip(`(${E[i].c.join(", ")}) · fitness ${fmt(E[i].f)}<br>${E[i].d}`, ev));
+        b.addEventListener("pointerleave", hideTip);
+        b.addEventListener("keydown", ev => {
+          const dx = { ArrowLeft: -1, ArrowRight: 1 }[ev.key] || 0, dy = { ArrowUp: 1, ArrowDown: -1 }[ev.key] || 0;
+          if (!dx && !dy) return;
+          ev.preventDefault();
+          let nx = x + dx, ny = y + dy;
+          while (nx >= 0 && nx < 8 && ny >= 0 && ny < 8) {
+            const t = grid.querySelector(`.tile[data-x="${nx}"][data-y="${ny}"]:not(.empty)`);
+            if (t) { t.focus(); t.click(); return; }
+            nx += dx; ny += dy;
+          }
+        });
+      }
+      grid.appendChild(b);
+    }
+  }
+  function meter(v) { return `<div class="meter"><i style="width:${Math.max(0, Math.min(1, v)) * 100}%"></i></div>`; }
+  function select(i) {
+    selected = i;
+    const e = E[i];
+    const sp = e.sp === 1 ? "1 species" : `${e.sp} species`;
+    const parent = e.p ? (e.p.join(",") === e.c.join(",") ? `same cell (${e.p.join(", ")})` : `<button type="button" class="linkbtn" id="goParent">(${e.p.join(", ")})</button>`) : "seed (random genome)";
+    detail.innerHTML = `
+      <div class="big" style="background-position:${pos(i)}" role="img" aria-label="Still of cell ${e.c.join(", ")}"></div>
+      <div><span class="cell-tag" style="font-size:14px">cell (${e.c.join(", ")})</span> <span class="muted" style="font-size:13px">from MAP-Elites run ${e.r}</span></div>
+      <div style="font-family:var(--f-display);font-size:17px">${e.d}</div>
+      <dl>
+        <dt>fitness</dt><dd>${fmt(e.f, 3)}${meter(e.f)}</dd>
+        <dt>structure</dt><dd>${fmt(e.t.structure)} · k = ${e.t.order}</dd>
+        <dt>crispness</dt><dd>${fmt(e.t.crispness)}</dd>
+        <dt>escape</dt><dd>${fmt(e.t.escape)}</dd>
+        <dt>duration</dt><dd>${fmt(e.t.duration)} · ${e.s} steps</dd>
+        <dt>chaos</dt><dd>${e.x[0].toFixed(4)} rad/frame</dd>
+        <dt>density</dt><dd>${fmt(e.x[1], 3)}</dd>
+        <dt>branching</dt><dd>${fmt(e.x[2], 3)}</dd>
+        <dt>particles</dt><dd>${e.n} · ${sp} · k = ${e.k}</dd>
+        <dt>forces</dt><dd>log2 pull ${e.pull} · push ${e.push}</dd>
+        <dt>made by</dt><dd><code>${e.op || "seed"}</code></dd>
+        <dt>parent</dt><dd>${parent}</dd>
+      </dl>`;
+    const gp = $("#goParent", detail);
+    if (gp) gp.addEventListener("click", () => {
+      const j = byCell.get(e.p.join(","));
+      if (j === undefined) return;
+      if (slice !== "all") setSlice(String(e.p[2]));
+      select(j);
+      const t = grid.querySelector(`.tile[data-x="${e.p[0]}"][data-y="${e.p[1]}"]`);
+      if (t) t.focus();
+    });
+    draw();
+  }
+  draw();
+  select(byCell.get("6,4,3"));
+})();
+
+/* ---- clips: play while on screen ---- */
+(function clips() {
+  const vids = [...document.querySelectorAll("video[data-src]")];
+  const userPaused = new WeakSet();
+  const setState = (v) => { const st = v.parentElement.querySelector(".state"); if (st) st.textContent = v.paused ? "▶ play" : "❚❚ pause"; };
+  function load(v) { if (!v.src) { v.src = v.dataset.src; } }
+  function play(v) { load(v); const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+  for (const v of vids) {
+    setState(v);
+    v.addEventListener("play", () => setState(v));
+    v.addEventListener("pause", () => setState(v));
+    const box = v.parentElement;
+    const toggle = () => { if (v.paused) { userPaused.delete(v); play(v); } else { userPaused.add(v); v.pause(); } };
+    box.addEventListener("click", toggle);
+    box.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggle(); } });
+  }
+  if (reduce || !("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver(entries => {
+    for (const en of entries) {
+      const v = en.target;
+      if (en.isIntersecting && en.intersectionRatio >= 0.5) { if (!userPaused.has(v)) play(v); }
+      else if (!v.paused) v.pause();
+    }
+  }, { threshold: [0, 0.5] });
+  vids.forEach(v => io.observe(v));
+})();
+</script>

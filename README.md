@@ -3,6 +3,7 @@
 Explore and evolve particle worlds: particles attract at long range and repel at short range, producing trails from orderly orbits to branching chaos. `atlas.py` searches this space with MAP-Elites, preserving strong worlds across a behavior map; the web viewer lets you browse and run them, then change their rules.
 
 Project report: [web/report.html](web/report.html) (portable, expandable HTML).
+Explainer: [explainer/index.html](explainer/index.html) walks through the physics, the atlas axes, fitness and mutation, with clips of the worlds (see [explainer/README.md](explainer/README.md)).
 
 ## Quick start
 
