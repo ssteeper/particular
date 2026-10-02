@@ -19,11 +19,13 @@ from particular import SCENES
 W = H = 1080
 FPS = 30
 SR = 44100
-ORDER = ["spiral", "counter", "nested", "bloom", "star", "wave", "binary", "collision", "triad"]
+ORDER = ["spiral", "counter", "nested", "bloom", "star", "wave", "binary", "collision", "triad",
+         "breath", "square", "quartet", "galaxy", "constellation"]
 INTRO = 3.0            # seconds before the first scene starts drawing
 HOLD = 1.2             # seconds a finished scene stays on screen
 FADE = 0.8             # crossfade between scenes
 OUTRO = 7.0            # grid of all scenes plus title
+TILE_GAP = 0.18        # seconds between grid tiles appearing
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 MONO = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
 
@@ -146,7 +148,9 @@ def final_still(scene, size):
 def render_video(tl, scenes_end, out_silent):
     total = scenes_end + OUTRO
     nframes = int(total * FPS)
-    tile = W // 3
+    cols = int(np.ceil(np.sqrt(len(tl))))
+    rows = int(np.ceil(len(tl) / cols))
+    tile = W // cols
     tiles = [final_still(s, tile) for s, *_ in tl]
     ff = subprocess.Popen(
         ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
@@ -172,16 +176,21 @@ def render_video(tl, scenes_end, out_silent):
                 k = (t - start) * FPS + 1
                 u = (t - start) / (end - start)
                 img += tonemap(s.frame(k, u)) * env
-                img += caption(i, s.name, env)
+                # captions fade out before the crossfade so two never overlap
+                cap = np.clip(min((t - start) / 0.4, (end - FADE - t) / 0.4), 0, 1)
+                img += caption(i, s.name, cap)
 
         # outro: tiles appear one by one, then the title
         if t >= scenes_end - FADE:
             ot = t - (scenes_end - FADE)
             grid = np.zeros_like(img)
             for i, tile_img in enumerate(tiles):
-                a = np.clip((ot - 0.25 * i) / 0.6, 0, 1)
-                r, c = divmod(i, 3)
-                grid[r * tile:(r + 1) * tile, c * tile:(c + 1) * tile] += tile_img * a
+                a = np.clip((ot - TILE_GAP * i) / 0.6, 0, 1)
+                r, c = divmod(i, cols)
+                in_row = min(cols, len(tiles) - r * cols)         # centre a short last row
+                x0 = (W - in_row * tile) // 2 + c * tile
+                y0 = (H - rows * tile) // 2 + r * tile
+                grid[y0:y0 + tile, x0:x0 + tile] += tile_img * a
             fade_out = np.clip((total - t) / 1.5, 0, 1)
             dim = 1 - 0.55 * np.clip((ot - 3.4) / 0.8, 0, 1)
             img += grid * dim * fade_out
@@ -206,7 +215,7 @@ def render_audio(tl, scenes_end, total, path):
     n = int(total * SR)
     t = np.arange(n) / SR
     out = np.zeros((n, 2))
-    roots = [50, 53, 45, 48, 43, 46, 50, 41, 45]          # D F A C G Bb D F A
+    roots = [50, 53, 45, 48, 43, 46, 50, 41, 45, 48, 43, 46, 41, 50]   # D F A C G Bb D F A C G Bb F D
     rng = np.random.default_rng(1)
 
     def env_at(start, end, fade):
@@ -241,9 +250,9 @@ def render_audio(tl, scenes_end, total, path):
     # outro: one bell per tile, over a D major chord
     o0 = scenes_end - FADE
     for i in range(len(tl)):
-        b = t - (o0 + 0.25 * i)
+        b = t - (o0 + TILE_GAP * i)
         bell = (b >= 0) & (b < 3)
-        f = note([74, 76, 78, 81, 83, 86, 88, 90, 93][i])
+        f = note([62, 64, 66, 69, 71, 74, 76, 78, 81, 83, 86, 88, 90, 93][i % 14])
         out[bell, i % 2] += 0.07 * np.exp(-b[bell] * 2.2) * np.sin(2 * np.pi * f * b[bell])
         out[bell, 1 - i % 2] += 0.04 * np.exp(-b[bell] * 2.2) * np.sin(2 * np.pi * f * b[bell])
     env = np.clip(np.minimum((t - o0) / 1.5, (total - t) / 2.0), 0, 1)

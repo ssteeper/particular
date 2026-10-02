@@ -122,6 +122,63 @@ def scene_star():
     return np.vstack(parts_p), np.vstack(parts_v), 1000, 24, "cool"
 
 
+# Five scenes in order of increasing complexity.
+def scene_breath():
+    # 1. One ring pushed outward with a little spin; it rises and falls back.
+    pos, vel = ring(60, 6.0, spin=20.0, radial=1300.0)
+    return pos, vel, 1000, 13, "hsv"
+
+
+def scene_square():
+    # 2. Particles along the edges of a square, swirling.
+    k = 20
+    s = np.linspace(-12, 12, k, endpoint=False)
+    edges = [np.c_[s, np.full(k, -12)], np.c_[np.full(k, 12), s],
+             np.c_[-s, np.full(k, 12)], np.c_[np.full(k, -12), -s]]
+    pos = np.vstack(edges)
+    vel = np.c_[-pos[:, 1], pos[:, 0]] * 90
+    return pos, vel, 1000, 20, "hsv"
+
+
+def scene_quartet():
+    # 3. Four rings at the corners of a square, alternating spin, the whole set orbiting.
+    parts = []
+    for k in range(4):
+        ang = np.pi / 4 + k * np.pi / 2
+        c = (13 * np.cos(ang), 13 * np.sin(ang))
+        v = (-900 * np.sin(ang), 900 * np.cos(ang))
+        parts.append(ring(28, 4.0, center=c, spin=(1 if k % 2 else -1) * 280.0, vel=v))
+    return (*_join(*parts), 1200, 24, "hsv")
+
+
+def scene_galaxy():
+    # 4. Three logarithmic spiral arms around a counter-rotating core.
+    arms_p, arms_v = [], []
+    for k in range(3):
+        u = np.linspace(0, 1, 50)
+        rad = 5 * np.exp(1.4 * u)
+        th = 2 * np.pi * k / 3 + 2.2 * u
+        p = np.c_[rad * np.cos(th), rad * np.sin(th)]
+        arms_p.append(p)
+        arms_v.append(np.c_[-np.sin(th), np.cos(th)] * (200 + 20 * rad)[:, None])
+    core = ring(30, 2.5, spin=-500.0)
+    pos = np.vstack(arms_p + [core[0]])
+    vel = np.vstack(arms_v + [core[1]])
+    return pos, vel, 600, 24, "hsv"
+
+
+def scene_constellation():
+    # 5. A spinning central ring, six spinning rings orbiting it, and a loose outer halo.
+    parts = [ring(36, 5.0, spin=-260.0)]
+    for k in range(6):
+        ang = 2 * np.pi * k / 6
+        c = (16 * np.cos(ang), 16 * np.sin(ang))
+        v = (-1000 * np.sin(ang), 1000 * np.cos(ang))
+        parts.append(ring(22, 3.0, center=c, spin=(1 if k % 2 else -1) * 380.0, vel=v, phase=ang))
+    parts.append(ring(90, 26.0, spin=-30.0, radial=-200.0))
+    return (*_join(*parts), 1100, 30, "hsv")
+
+
 SCENES = {
     "spiral": scene_spiral,
     "counter": scene_counter,
@@ -132,4 +189,9 @@ SCENES = {
     "binary": scene_binary,
     "triad": scene_triad,
     "star": scene_star,
+    "breath": scene_breath,
+    "square": scene_square,
+    "quartet": scene_quartet,
+    "galaxy": scene_galaxy,
+    "constellation": scene_constellation,
 }
