@@ -115,10 +115,20 @@ def pick(results, count):
     return picks
 
 
+def load_font(size):
+    """A monospace font if one is installed (Linux or Windows), else Pillow's built-in one."""
+    for name in ("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", "DejaVuSansMono.ttf", "consola.ttf"):
+        try:
+            return ImageFont.truetype(name, size)
+        except OSError:
+            pass
+    return ImageFont.load_default()
+
+
 def contact_sheet(picks, path, tile=360, cols=4):
     rows = (len(picks) + cols - 1) // cols
     sheet = Image.new("RGB", (cols * tile, rows * tile))
-    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 14)
+    font = load_font(14)
     d = ImageDraw.Draw(sheet)
     for i, r in enumerate(picks):
         im = Image.open(r["image"]).convert("RGB").resize((tile, tile), Image.LANCZOS)

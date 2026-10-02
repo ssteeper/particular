@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-from make_gallery import trajectory
+from make_gallery import species_colors, trajectory
 from particular import SCENES
 
 W = H = 1080
@@ -66,10 +66,12 @@ class Scene:
     def __init__(self, name):
         self.name = name
         self.data = trajectory(name)
-        _, _, _, self.half, cmap = SCENES[name]()
+        s = SCENES[name]()
+        self.half = s["half"]
         self.n = len(self.data)
         t = np.linspace(0, 1, self.n)
-        self.colors = plt.get_cmap(cmap)(t)[:, :3]
+        self.colors = plt.get_cmap(s["cmap"])(t)[:, :3]
+        self.rgb = species_colors(s)           # per-particle colors for ecosystem scenes
         self.alpha = 1 - t
         self.spin = np.radians(np.random.default_rng(len(name)).choice([-1, 1]) * 12)
 
@@ -84,7 +86,10 @@ class Scene:
         x = W / 2 + zoom * (ca * xy[:, 0] - sa * xy[:, 1])
         y = H / 2 - zoom * (sa * xy[:, 0] + ca * xy[:, 1])
         per = pts.shape[1]
-        rgb = np.repeat(self.colors[:k] * self.alpha[:k, None], per, axis=0) * 1.4
+        if self.rgb is None:
+            rgb = np.repeat(self.colors[:k] * self.alpha[:k, None], per, axis=0) * 1.4
+        else:
+            rgb = (self.alpha[:k, None, None] * self.rgb[None]).reshape(-1, 3) * 1.4
         acc = np.zeros((H, W, 3), np.float32)
         splat(acc, x, y, rgb, 0.9)
         if k < self.n:  # bright heads at the particles' current positions

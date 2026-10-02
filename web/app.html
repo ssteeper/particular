@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Particular Sandbox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -133,10 +134,11 @@ button {
   cursor: pointer;
 }
 button:hover { border-color: var(--muted); }
-button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: 0.45; cursor: default; border-color: var(--line); }
 button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; min-width: 5em; }
 .tabs { display: flex; gap: 4px; background: var(--raise); padding: 3px; border-radius: var(--radius); }
-.tabs button { flex: 1; border: 0; background: transparent; padding: 5px 8px; color: var(--muted); }
+.tabs button { flex: 1; border: 0; background: transparent; padding: 5px 4px; color: var(--muted); white-space: nowrap; }
 .tabs button[aria-selected="true"] { background: var(--line); color: var(--ink); }
 .thumbs {
   display: grid;
@@ -172,9 +174,49 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
 .seg button { padding: 5px 10px; color: var(--muted); }
 .seg button[aria-pressed="true"] { color: var(--ink); border-color: var(--accent); }
 .desc { font-family: var(--font-data); font-size: var(--step--1); color: var(--muted); margin: 0; overflow-wrap: anywhere; }
-textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font-size: 0.7rem; background: var(--raise); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius); box-sizing: border-box; }
+textarea.box { width: 100%; height: 6em; font-family: var(--font-data); font-size: 0.7rem; background: var(--raise); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius); box-sizing: border-box; }
+select, input[type="text"] { font: inherit; color: var(--ink); background: var(--raise); border: 1px solid var(--line); border-radius: var(--radius); padding: 6px 8px; min-width: 0; flex: 1; }
+.matrix { display: grid; gap: 3px; align-items: center; }
+.matrix .corner { font-size: var(--step--1); color: var(--muted); }
+.matrix input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  font-family: var(--font-data);
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--ink);
+  background: var(--raise);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 3px 4px;
+}
+.dot { display: inline-block; width: 0.7em; height: 0.7em; border-radius: 50%; justify-self: center; }
+.seg .dot { margin-right: 0.4em; }
+.swatches { display: flex; gap: 6px; align-items: center; }
+.swatches input[type="color"] { width: 30px; height: 24px; padding: 0 2px; border: 1px solid var(--line); border-radius: 4px; background: var(--raise); cursor: pointer; }
+.field .seg, .field .swatches { grid-column: span 2; }
+/* Atlas: the panel widens so the map's cells are big enough to read. */
+.app.wide { grid-template-columns: minmax(0, 1fr) 480px; }
+.atlas { display: flex; flex-direction: column; gap: 10px; }
+.atlas-axes { display: grid; grid-template-columns: 4em minmax(0, 1fr); gap: 6px 8px; align-items: center; }
+.atlas-slice { display: flex; flex-direction: column; gap: 6px; }
+.atlas-slice > span { font-size: var(--step--1); color: var(--muted); }
+.atlas .seg button { padding: 4px 0; min-width: 2.4em; }
+.atlas-map { display: grid; grid-template-columns: 1.3em minmax(0, 1fr); gap: 4px; }
+.atlas-ylabel { writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; font-size: var(--step--1); color: var(--muted); }
+.atlas-xlabel { grid-column: 2; text-align: center; font-size: var(--step--1); color: var(--muted); }
+.atlas-grid { display: grid; gap: 2px; }
+.atlas-grid .cell { padding: 0; aspect-ratio: 1; border: 1px solid transparent; border-radius: 3px; background: #000; overflow: hidden; }
+.atlas-grid .cell img { width: 100%; height: 100%; display: block; }
+.atlas-grid .cell:hover { border-color: var(--muted); }
+.atlas-grid .cell[aria-pressed="true"] { border-color: var(--accent); }
+.atlas-grid .empty { aspect-ratio: 1; border-radius: 3px; background: var(--raise); opacity: 0.5; }
+#atlas-info { min-height: 4.4em; }
+[hidden] { display: none !important; }
 @media (max-width: 860px) {
-  .app { grid-template-columns: minmax(0, 1fr); }
+  .app, .app.wide { grid-template-columns: minmax(0, 1fr); }
   .frame { width: 100%; }
   .panel { max-height: none; }
 }
@@ -214,9 +256,24 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
       <h2>Starting setups</h2>
       <div class="tabs" role="tablist">
         <button role="tab" id="tab-made" aria-selected="true">Hand-made</button>
-        <button role="tab" id="tab-found" aria-selected="false">Found by search</button>
+        <button role="tab" id="tab-eco" aria-selected="false">Ecosystems</button>
+        <button role="tab" id="tab-found" aria-selected="false">Found</button>
+        <button role="tab" id="tab-atlas" aria-selected="false" hidden>Atlas</button>
       </div>
       <div class="thumbs" id="thumbs"></div>
+      <div class="atlas" id="atlas" hidden>
+        <div class="atlas-axes">
+          <label for="atlas-x">Across</label><select id="atlas-x"></select>
+          <label for="atlas-y">Up</label><select id="atlas-y"></select>
+        </div>
+        <div class="atlas-slice"><span id="atlas-z-label"></span><div class="seg" id="atlas-z" role="group"></div></div>
+        <div class="atlas-map">
+          <div class="atlas-ylabel" id="atlas-y-label" aria-hidden="true"></div>
+          <div class="atlas-grid" id="atlas-grid" role="group" aria-label="Map of worlds. Arrow keys move between worlds."></div>
+          <div class="atlas-xlabel" id="atlas-x-label" aria-hidden="true"></div>
+        </div>
+        <p class="desc" id="atlas-info" aria-live="polite"></p>
+      </div>
       <p class="note" id="group-note"></p>
     </section>
 
@@ -225,6 +282,23 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
       <div class="field"><label for="g">Pull</label><input type="range" id="g" min="-2" max="2" step="0.05" value="0"><output id="g-out">1.00×</output></div>
       <div class="field"><label for="c">Push</label><input type="range" id="c" min="-2" max="2" step="0.05" value="0"><output id="c-out">1.00×</output></div>
       <p class="note">Pull falls off with distance squared, push with distance cubed, so particles settle about <strong id="spacing">2.0</strong> units apart.</p>
+    </section>
+
+    <section aria-label="Ecosystem">
+      <h2>Ecosystem</h2>
+      <div class="row"><select id="preset" aria-label="Rules preset"></select><button id="preset-del">Delete</button></div>
+      <p class="note" id="eco-note"></p>
+      <div class="field"><label>Species</label>
+        <div class="seg" id="eco-s" role="group" aria-label="Number of species"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button></div>
+      </div>
+      <div class="field"><label>Colors</label><div class="swatches" id="eco-colors" role="group" aria-label="Species colors"></div></div>
+      <div class="matrix" id="m-pull" aria-label="Pull matrix"></div>
+      <div class="matrix" id="m-push" aria-label="Push matrix"></div>
+      <p class="note">Each row is the species that moves, each column the species it reacts to, so the rules can be one-sided: a row pulled toward a column that pushes it away is a chase. Pull below zero repels at long range. Two species settle about 2 × push ÷ pull apart.</p>
+      <div class="row"><input type="text" id="preset-name" placeholder="Preset name" aria-label="Preset name"><button id="preset-save">Save preset</button></div>
+      <div class="row"><button id="preset-export">Export</button><button id="preset-import">Import</button><button id="mix">Mix species</button></div>
+      <p class="note" id="preset-msg">Saved presets stay in this browser. Mix species deals the current setup's particles out to the species in turn.</p>
+      <textarea id="presetbox" class="box" hidden aria-label="Preset JSON"></textarea>
     </section>
 
     <section aria-label="Drawing">
@@ -238,6 +312,7 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
         <button data-v="time" aria-pressed="true">Color by time</button>
         <button data-v="particle" aria-pressed="false">by particle</button>
         <button data-v="speed" aria-pressed="false">by speed</button>
+        <button data-v="species" aria-pressed="false">by species</button>
       </div>
       <div class="field"><label for="len">Length</label><input type="range" id="len" min="200" max="3000" step="100" value="1000"><output id="len-out">1000</output></div>
       <div class="field"><label for="dot">Dot size</label><input type="range" id="dot" min="0.5" max="3" step="0.1" value="1.2"><output id="dot-out">1.2</output></div>
@@ -248,6 +323,7 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
       <div class="field"><label for="ring-n">Particles</label><input type="range" id="ring-n" min="6" max="80" step="1" value="30"><output id="ring-n-out">30</output></div>
       <div class="field"><label for="ring-r">Radius</label><input type="range" id="ring-r" min="1" max="15" step="0.5" value="5"><output id="ring-r-out">5</output></div>
       <div class="field"><label for="ring-s">Spin</label><input type="range" id="ring-s" min="-400" max="400" step="10" value="200"><output id="ring-s-out">200</output></div>
+      <div class="field"><label>Species</label><div class="seg" id="ring-sp" role="group" aria-label="Species of the next ring"></div></div>
       <p class="note" id="add-note"></p>
     </section>
 
@@ -258,8 +334,8 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
 
     <section aria-label="Export">
       <div class="row"><button id="copy">Copy setup as JSON</button></div>
-      <p class="note" id="copy-note">Positions and velocities at the start of the run, to paste into Python.</p>
-      <textarea id="copybox" hidden readonly></textarea>
+      <p class="note" id="copy-note">Positions, velocities, species and rules at the start of the run, to paste into Python.</p>
+      <textarea id="copybox" class="box" hidden readonly></textarea>
     </section>
   </aside>
 </div>
@@ -290,8 +366,10 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
   const LIVE_FADE = 0.965;   // share of an older snapshot's ink left after each new one in Live mode
   const LIVE_KEEP = 160;     // snapshots kept for redraws in Live mode; older ones have faded out
   const BUCKETS = 128;       // colors per snapshot; dots of one color are filled together
-  const ui = { mode: "still", color: "time", group: "made", gScale: 1, cScale: 1, speed: 2, dot: 1.2, len: 1000 };
-  let setup = null;          // {name, p: [x,y,...], v: [...], steps, half, cmap, desc}
+  const ui = { mode: "still", color: "time", group: "made", gScale: 1, cScale: 1, speed: 2, dot: 1.2, len: 1000, ringSp: 0 };
+  let setup = null;          // {name, p: [x,y,...], v: [...], species: [...] | null, rules, steps, half, cmap, desc}
+  let eco = null;            // rules in force: {S, pull, push, colors, note}; pull[a][b] scales how a reacts to b
+  let ecoKey = "";           // preset they came from, "b:<name>" built in or "s:<name>" saved; "" once edited
   let sim = null;            // live arrays
   let history = [];          // logged snapshots, kept so the trails can be redrawn at a new zoom
   let playing = !matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -301,8 +379,15 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
   const view = { cx: 0, cy: 0, half: 20 };
   let W = 0, scale = 1, dirty = false;
 
+  // opts.keepRules keeps the ecosystem in force; otherwise the setup's own rules (or classic) apply
   function loadSetup(s, opts = {}) {
-    setup = { ...s, p: s.p.slice(), v: s.v.slice() };
+    setup = { ...s, p: s.p.slice(), v: s.v.slice(), species: s.species ? s.species.slice() : null };
+    if (!opts.keepRules) {
+      const r = s.rules || DATA.rules.classic;
+      const name = s.rules ? s.rules.name : "classic";
+      setRules(r, name && DATA.rules[name] ? "b:" + name : "");
+      setForces(s.pull || 1, s.push || 1);
+    }
     if (!opts.keepLength) {
       ui.len = s.steps;
       $("len").value = s.steps;
@@ -320,11 +405,15 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
       x: new Float64Array(n), y: new Float64Array(n),
       vx: new Float64Array(n), vy: new Float64Array(n),
       ax: new Float64Array(n), ay: new Float64Array(n),
+      sp: new Int32Array(n),
+      pg: new Float64Array(eco.S * eco.S), pc: new Float64Array(eco.S * eco.S),
+      sym: eco.pull.every((row, a) => row.every((v, b) => v === eco.pull[b][a] && eco.push[a][b] === eco.push[b][a])),
       step: 0,
     };
     for (let i = 0; i < n; i++) {
       sim.x[i] = setup.p[2 * i]; sim.y[i] = setup.p[2 * i + 1];
       sim.vx[i] = setup.v[2 * i]; sim.vy[i] = setup.v[2 * i + 1];
+      sim.sp[i] = setup.species ? setup.species[i] % eco.S : 0;
     }
     speedScale = 0;
     for (let i = 0; i < n; i++) speedScale = Math.max(speedScale, Math.hypot(sim.vx[i], sim.vy[i]));
@@ -338,23 +427,32 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
     updateReadout();
   }
 
+  // Particle i (species a) is accelerated by j (species b) with -g pull[a][b] / r^2 + c push[a][b] / r^3
+  // along r_i - r_j, as particular.simulate. One-sided rules need both directions of every pair.
   function stepSim(count) {
-    const { n, x, y, vx, vy, ax, ay } = sim;
-    const g = G0 * ui.gScale, c = C0 * ui.cScale;
+    const { n, x, y, vx, vy, ax, ay, sp, pg, pc, sym } = sim;
+    const S = eco.S, g = G0 * ui.gScale, c = C0 * ui.cScale;
+    for (let a = 0; a < S; a++) {
+      for (let b = 0; b < S; b++) { pg[a * S + b] = g * eco.pull[a][b]; pc[a * S + b] = c * eco.push[a][b]; }
+    }
     for (let s = 0; s < count; s++) {
       ax.fill(0); ay.fill(0);
       for (let i = 0; i < n; i++) {
-        const xi = x[i], yi = y[i];
+        const xi = x[i], yi = y[i], si = sp[i] * S;
         let axi = 0, ayi = 0;
         for (let j = i + 1; j < n; j++) {
           const dx = xi - x[j], dy = yi - y[j];
           const r2 = dx * dx + dy * dy;
           if (r2 === 0) continue;
-          const r = Math.sqrt(r2);
-          const coef = -g / (r2 * r) + c / (r2 * r2);
-          const fx = coef * dx, fy = coef * dy;
-          axi += fx; ayi += fy;
-          ax[j] -= fx; ay[j] -= fy;
+          const i3 = 1 / (r2 * Math.sqrt(r2)), i4 = 1 / (r2 * r2);
+          const k = si + sp[j];
+          const coef = pc[k] * i4 - pg[k] * i3;
+          axi += coef * dx; ayi += coef * dy;
+          if (sym) { ax[j] -= coef * dx; ay[j] -= coef * dy; }
+          else {
+            const kj = sp[j] * S + sp[i], back = pc[kj] * i4 - pg[kj] * i3;
+            ax[j] -= back * dx; ay[j] -= back * dy;
+          }
         }
         ax[i] += axi; ay[i] += ayi;
       }
@@ -416,21 +514,24 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
       alpha = 0.85 * LIVE_FADE ** age;
     }
     if (alpha <= 0.002) return;
-    const r = dotRadius(), xy = snap.xy, n = snap.sp.length;
+    const r = dotRadius(), xy = snap.xy, n = snap.sp.length, bySpecies = ui.color === "species";
     const paths = [];
     for (let i = 0; i < n; i++) {
       const px = toPx(xy[2 * i]), py = toPy(xy[2 * i + 1]);
       if (px < -r || py < -r || px > W + r || py > W + r) continue;
       const t = ui.color === "time" ? tTime : ui.color === "particle" ? i / Math.max(1, n - 1) : snap.sp[i];
-      const b = Math.round(t * (BUCKETS - 1));
+      const b = bySpecies ? sim.sp[i] : Math.round(t * (BUCKETS - 1));
       const path = paths[b] || (paths[b] = new Path2D());
       path.moveTo(px + r, py);
       path.arc(px, py, r, 0, 6.2832);
     }
     tctx.globalAlpha = alpha;
     paths.forEach((path, b) => {
-      const c = cmap(setup.cmap, b / (BUCKETS - 1));
-      tctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+      if (bySpecies) tctx.fillStyle = eco.colors[b];
+      else {
+        const c = cmap(setup.cmap, b / (BUCKETS - 1));
+        tctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+      }
       tctx.fill(path);
     });
     tctx.globalAlpha = 1;
@@ -487,7 +588,7 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
     }
     if (drag) {
       const rr = +$("ring-r").value * scale;
-      ctx.strokeStyle = "rgba(185,195,255,0.8)";
+      ctx.strokeStyle = eco.S > 1 ? eco.colors[Math.min(ui.ringSp, eco.S - 1)] : "rgba(185,195,255,0.8)";
       ctx.lineWidth = Math.max(1, W / 600);
       ctx.beginPath(); ctx.arc(drag.x0, drag.y0, rr, 0, 6.2832); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(drag.x0, drag.y0); ctx.lineTo(drag.x1, drag.y1); ctx.stroke();
@@ -524,8 +625,10 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
     const parts = [setup.name];
     if (setup.desc) parts.push(setup.desc);
     if (setup.score != null) parts.push(`score ${setup.score.toFixed(2)}`);
+    if (setup.fitness != null) parts.push(`fitness ${setup.fitness.toFixed(2)}`);
     $("setup-desc").textContent = parts.join(" · ");
-    document.querySelectorAll(".thumb").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.name === setup.name)));
+    document.querySelectorAll(".thumb, .cell").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.name === setup.name)));
+    if (atlas && ui.group === "atlas") atlasInfo(null);
   }
 
   // ------------------------------------------------------------ random
@@ -618,31 +721,150 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
       b.addEventListener("click", () => { playing = true; loadSetup(s); });
       box.append(b);
     }
-    $("group-note").textContent = ui.group === "made"
-      ? "Setups designed by hand. The first is the original notebook's spiral."
-      : "Picked by search.py from 800 random setups, scored on how much of the frame they fill, symmetry, smooth motion, and how few particles fly off.";
+    $("group-note").textContent = {
+      made: "Setups designed by hand. The first is the original notebook's spiral.",
+      eco: "Ecosystems: the same physics with species. Each one loads its rules into the Ecosystem panel below.",
+      found: "Picked by search.py from 800 random setups, scored on how much of the frame they fill, symmetry, smooth motion, and how few particles fly off.",
+      atlas: atlas && `An atlas of possible worlds: atlas.py simulated ${atlas.evaluations.toLocaleString("en")} setups with MAP-Elites and kept the best-drawn one in every cell of this map: k-fold symmetric, fine-grained trails, few particles flying off, and runs that keep developing. Each world brings its own forces and species rules. Choose two axes for the grid; the third slices it.`,
+    }[ui.group];
   }
   function setTab(group) {
     ui.group = group;
-    $("tab-made").setAttribute("aria-selected", String(group === "made"));
-    $("tab-found").setAttribute("aria-selected", String(group === "found"));
+    for (const g of ["made", "eco", "found", "atlas"]) $("tab-" + g).setAttribute("aria-selected", String(group === g));
+    $("thumbs").hidden = group === "atlas";
+    $("atlas").hidden = group !== "atlas";
+    document.querySelector(".app").classList.toggle("wide", group === "atlas");
+    if (group === "atlas") buildAtlas();
     buildThumbs();
   }
-  $("tab-made").onclick = () => setTab("made");
-  $("tab-found").onclick = () => setTab("found");
+  for (const g of ["made", "eco", "found", "atlas"]) $("tab-" + g).onclick = () => setTab(g);
 
-  function segment(id, key, after) {
-    const box = $(id);
-    box.addEventListener("click", (e) => {
+  // ------------------------------------------------------------- atlas
+  // DATA.atlas: {axes: [{name, label, bins, edges}], evaluations, elites: [{cell, features, fitness, ...setup}]}.
+  // The grid shows two axes; the third is a slice, or "all" for the fittest world over every slice.
+  // A new slice axis starts at "all".
+  const atlas = DATA.atlas;
+  const at = { x: 0, y: 1, z: 2, slice: "all" };
+  function float64s(b64) {
+    const bin = atob(b64), bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return Array.from(new Float64Array(bytes.buffer));
+  }
+  const OPS = { piece: "a piece mutation", structure: "a structural mutation", forces: "a force mutation",
+    species: "a species mutation", steps: "a run-length mutation", crossover: "crossover" };
+  function worldText(e) {
+    const f = atlas.axes.map((a, i) => `${a.name} ${e.features[i].toFixed(a.name === "chaos" ? 3 : 2)}`).join(", ");
+    const forces = e.pull !== 1 || e.push !== 1 ? ` · pull ${e.pull.toFixed(2)}× push ${e.push.toFixed(2)}×` : "";
+    const species = e.rules ? ` · ${e.rules.pull.length} species` : "";
+    const origin = e.parent ? `bred from world ${e.parent.join("-")} by ${OPS[e.op] || e.op}` : "from the random start";
+    return `${e.desc} · fitness ${e.fitness.toFixed(2)} · ${f}${forces}${species} · ${origin}`;
+  }
+  function atlasInfo(e) {
+    const current = setup && setup.group === "atlas" ? setup : null;
+    const w = e || current;
+    $("atlas-info").textContent = w ? `${w.name}: ${worldText(w)}` : "Hover over or focus a world to read about it; click it to run it.";
+  }
+  function buildAtlas() {
+    const ax = atlas.axes, X = ax[at.x], Y = ax[at.y], Z = ax[at.z];
+    $("atlas-x").value = at.x; $("atlas-y").value = at.y;
+    $("atlas-x-label").textContent = X.label;
+    $("atlas-y-label").textContent = Y.label;
+    $("atlas-z-label").textContent = `Slice: ${Z.label}`;
+    const zs = $("atlas-z");
+    zs.textContent = "";
+    zs.setAttribute("aria-label", `Slice of ${Z.label}`);
+    for (const v of ["all", ...Array.from({ length: Z.bins }, (_, k) => k)]) {
+      const b = document.createElement("button");
+      b.dataset.v = v;
+      b.textContent = v === "all" ? "All" : v + 1;
+      b.title = v === "all" ? "The fittest world over every slice" : `Slice ${v + 1} of ${Z.bins}`;
+      b.setAttribute("aria-pressed", String(v === at.slice));
+      zs.append(b);
+    }
+    const best = new Map();
+    for (const e of atlas.elites) {
+      if (at.slice !== "all" && e.cell[at.z] !== at.slice) continue;
+      const key = e.cell[at.x] + "," + e.cell[at.y], cur = best.get(key);
+      if (!cur || e.fitness > cur.fitness) best.set(key, e);
+    }
+    const grid = $("atlas-grid");
+    grid.textContent = "";
+    grid.style.gridTemplateColumns = `repeat(${X.bins}, minmax(0, 1fr))`;
+    for (let y = Y.bins - 1; y >= 0; y--) {
+      for (let x = 0; x < X.bins; x++) {
+        const e = best.get(x + "," + y);
+        const el = document.createElement(e ? "button" : "div");
+        el.dataset.x = x; el.dataset.y = y;
+        if (!e) { el.className = "empty"; grid.append(el); continue; }
+        el.className = "cell";
+        el.dataset.name = e.name;
+        el.setAttribute("aria-pressed", String(!!setup && setup.name === e.name));
+        el.setAttribute("aria-label", `${e.name}, ${X.label} ${x + 1} of ${X.bins}, ${Y.label} ${y + 1} of ${Y.bins}`);
+        const img = document.createElement("img");
+        img.src = e.thumb; img.alt = "";
+        el.append(img);
+        el.addEventListener("click", () => { playing = true; loadSetup(e); });
+        el.addEventListener("mouseenter", () => atlasInfo(e));
+        el.addEventListener("focus", () => atlasInfo(e));
+        el.addEventListener("mouseleave", () => atlasInfo(null));
+        el.addEventListener("blur", () => atlasInfo(null));
+        grid.append(el);
+      }
+    }
+    atlasInfo(null);
+  }
+  // x and y differ: picking the axis that is already on the other side swaps the two
+  function setAxes(x, y) {
+    const z = 3 - x - y;
+    if (z !== at.z) at.slice = "all";
+    Object.assign(at, { x, y, z });
+    buildAtlas();
+  }
+  if (atlas) {
+    for (const e of atlas.elites) { e.p = float64s(e.pb); e.v = float64s(e.vb); }
+    for (const id of ["atlas-x", "atlas-y"]) atlas.axes.forEach((a, i) => $(id).append(new Option(a.label, i)));
+    $("atlas-x").addEventListener("change", (e) => setAxes(+e.target.value, at.y === +e.target.value ? at.x : at.y));
+    $("atlas-y").addEventListener("change", (e) => setAxes(at.x === +e.target.value ? at.y : at.x, +e.target.value));
+    $("atlas-z").addEventListener("click", (e) => {
       const b = e.target.closest("button");
       if (!b) return;
-      ui[key] = b.dataset.v;
-      box.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      at.slice = b.dataset.v === "all" ? "all" : +b.dataset.v;
+      buildAtlas();
+      const again = $("atlas-z").querySelector(`[data-v="${b.dataset.v}"]`);
+      if (again) again.focus();
+    });
+    // arrow keys move to the nearest world in that direction, skipping empty cells
+    $("atlas-grid").addEventListener("keydown", (e) => {
+      const step = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[e.key];
+      const from = e.target.closest(".cell");
+      if (!step || !from) return;
+      e.preventDefault();
+      let x = +from.dataset.x, y = +from.dataset.y;
+      for (;;) {
+        x += step[0]; y += step[1];
+        const next = $("atlas-grid").querySelector(`[data-x="${x}"][data-y="${y}"]`);
+        if (!next) return;
+        if (next.classList.contains("cell")) { next.focus(); return; }
+      }
+    });
+    $("tab-atlas").hidden = false;
+  }
+
+  function pick(id, key, v) {
+    ui[key] = v;
+    $(id).querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.v === String(v))));
+  }
+  function segment(id, key, after) {
+    $(id).addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      pick(id, key, b.dataset.v);
       after && after();
     });
   }
   segment("mode", "mode", () => { notes(); playing = true; restart(); });
   segment("color", "color", () => { dirty = true; });
+  segment("ring-sp", "ringSp", () => { ui.ringSp = +ui.ringSp; });
 
   function slider(id, fmt, apply) {
     const el = $(id), out = $(id + "-out");
@@ -662,6 +884,13 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
   $("c").addEventListener("change", () => { playing = true; restart(); });
   $("len").addEventListener("change", () => { if (ui.mode === "still") { playing = true; restart(); } });
   function spacing() { $("spacing").textContent = (C0 * ui.cScale / (G0 * ui.gScale)).toFixed(1); }
+  // a setup's own force scales (multipliers); the sliders snap to their step, the forces stay exact
+  function setForces(pull, push) {
+    ui.gScale = pull; ui.cScale = push;
+    $("g").value = Math.log2(pull); $("c").value = Math.log2(push);
+    $("g-out").textContent = pull.toFixed(2) + "×"; $("c-out").textContent = push.toFixed(2) + "×";
+    spacing();
+  }
   function notes() {
     $("mode-note").textContent = ui.mode === "still"
       ? "Runs for the set length and fades later trails, like the notebook's plots."
@@ -671,20 +900,239 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
       : "Click the canvas to drop a ring into the running simulation; drag to throw it.";
   }
 
+  // --------------------------------------------------------- ecosystem
+  const MAX_S = 4, STORE = "particular.presets";
+  const say = (msg) => { $("preset-msg").textContent = msg; };
+  const dealt = (n) => Array.from({ length: n }, (_, i) => i % eco.S);
+  function savedPresets() {
+    try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch { return {}; }
+  }
+  function storePresets(all) {
+    try { localStorage.setItem(STORE, JSON.stringify(all)); return true; } catch { return false; }
+  }
+  // check a preset, or a copied setup holding one, and return its rules; throws with the reason
+  function readRules(o) {
+    if (o && o.rules && o.rules.pull) o = { name: o.name, ...o.rules };
+    const S = o && Array.isArray(o.pull) ? o.pull.length : 0;
+    if (S < 1 || S > MAX_S) throw new Error(`it needs a pull matrix with 1 to ${MAX_S} rows`);
+    for (const key of ["pull", "push"]) {
+      const m = o[key];
+      const ok = Array.isArray(m) && m.length === S &&
+        m.every((row) => Array.isArray(row) && row.length === S && row.every((v) => typeof v === "number" && isFinite(v)));
+      if (!ok) throw new Error(`${key} must be a ${S} × ${S} grid of numbers`);
+    }
+    return o;
+  }
+  function setRules(r, key) {
+    const S = r.pull.length;
+    eco = {
+      S,
+      pull: r.pull.map((row) => row.map(Number)),
+      push: r.push.map((row) => row.map(Number)),
+      colors: Array.from({ length: S }, (_, k) => /^#[0-9a-f]{6}$/i.test(r.colors && r.colors[k]) ? r.colors[k] : DATA.palette[k]),
+      note: typeof r.note === "string" ? r.note : "",
+    };
+    ecoKey = key;
+    buildEco();
+  }
+  const rulesJSON = (name) => JSON.parse(JSON.stringify({ name, species: eco.S, pull: eco.pull, push: eco.push, colors: eco.colors, note: eco.note }));
+  function edited() {
+    ecoKey = "";
+    eco.note = "";
+    buildPresets();
+    playing = true;
+    restart();
+    hint();
+  }
+  // nudge when the rules have species to tell apart but every particle is still species 1
+  function hint(done = "") {
+    const unmixed = eco.S > 1 && sim.n && sim.sp.every((s) => s === 0);
+    const tip = "Every particle is species 1 so far: mix species, or add rings of other species, to see the rules at work.";
+    if (done || unmixed) say(unmixed ? `${done} ${tip}`.trim() : done);
+  }
+  function dot(k) {
+    const d = document.createElement("span");
+    d.className = "dot";
+    d.dataset.k = k;
+    d.style.background = eco.colors[k];
+    return d;
+  }
+  function buildEco() {
+    $("eco-s").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.v === eco.S)));
+    const sw = $("eco-colors");
+    sw.textContent = "";
+    eco.colors.forEach((c, k) => {
+      const inp = document.createElement("input");
+      inp.type = "color";
+      inp.value = c;
+      inp.setAttribute("aria-label", `Species ${k + 1} color`);
+      inp.addEventListener("input", () => {
+        eco.colors[k] = inp.value;
+        document.querySelectorAll(`.dot[data-k="${k}"]`).forEach((d) => { d.style.background = inp.value; });
+        if (ecoKey || eco.note) { ecoKey = ""; eco.note = ""; buildPresets(); }
+        dirty = true;
+      });
+      sw.append(inp);
+    });
+    matrix("m-pull", "pull");
+    matrix("m-push", "push");
+    ui.ringSp = Math.min(ui.ringSp, eco.S - 1);
+    const rs = $("ring-sp");
+    rs.textContent = "";
+    for (let k = 0; k < eco.S; k++) {
+      const b = document.createElement("button");
+      b.dataset.v = k;
+      b.setAttribute("aria-pressed", String(k === ui.ringSp));
+      b.append(dot(k), String(k + 1));
+      rs.append(b);
+    }
+    buildPresets();
+  }
+  const shown = (v) => +v.toFixed(2);   // matrix cells show 2 decimals; the rules keep every digit
+  // rows: the species that moves; columns: the species it reacts to
+  function matrix(id, key) {
+    const box = $(id), S = eco.S;
+    box.textContent = "";
+    box.style.gridTemplateColumns = `3.2em repeat(${S}, minmax(0, 1fr))`;
+    const corner = document.createElement("span");
+    corner.className = "corner";
+    corner.textContent = key === "pull" ? "Pull" : "Push";
+    box.append(corner);
+    for (let b = 0; b < S; b++) box.append(dot(b));
+    for (let a = 0; a < S; a++) {
+      box.append(dot(a));
+      for (let b = 0; b < S; b++) {
+        const inp = document.createElement("input");
+        inp.type = "number"; inp.step = "0.1"; inp.min = "-10"; inp.max = "10";
+        inp.value = shown(eco[key][a][b]);
+        inp.title = `${corner.textContent} on species ${a + 1} from species ${b + 1}`;
+        inp.setAttribute("aria-label", inp.title);
+        inp.addEventListener("change", () => {
+          const v = Math.max(-10, Math.min(10, parseFloat(inp.value)));
+          if (Number.isNaN(v)) { inp.value = shown(eco[key][a][b]); return; }
+          inp.value = v;
+          eco[key][a][b] = v;
+          edited();
+        });
+        box.append(inp);
+      }
+    }
+  }
+  function buildPresets() {
+    const sel = $("preset"), saved = savedPresets();
+    sel.textContent = "";
+    if (!ecoKey) sel.append(new Option(eco.note ? "This setup's rules" : "Custom (edited)", ""));
+    for (const [label, all, prefix] of [["Built in", DATA.rules, "b:"], ["Saved", saved, "s:"]]) {
+      const names = Object.keys(all);
+      if (!names.length) continue;
+      const group = document.createElement("optgroup");
+      group.label = label;
+      for (const name of names) group.append(new Option(name, prefix + name));
+      sel.append(group);
+    }
+    sel.value = ecoKey;
+    $("preset-del").disabled = !ecoKey.startsWith("s:");
+    $("eco-note").textContent = ecoKey || eco.note ? eco.note : "Edited rules. Name and save them to keep them.";
+  }
+  $("preset").addEventListener("change", (e) => {
+    const key = e.target.value;
+    const r = key.startsWith("b:") ? DATA.rules[key.slice(2)] : savedPresets()[key.slice(2)];
+    if (!r) return;
+    setRules(r, key);
+    playing = true;
+    restart();
+    hint();
+  });
+  $("eco-s").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b || +b.dataset.v === eco.S) return;
+    const S = +b.dataset.v;
+    const fit = (m) => Array.from({ length: S }, (_, a) => Array.from({ length: S }, (_, c) => (a < eco.S && c < eco.S ? m[a][c] : 1)));
+    eco.pull = fit(eco.pull);
+    eco.push = fit(eco.push);
+    eco.colors = Array.from({ length: S }, (_, k) => eco.colors[k] || DATA.palette[k]);
+    eco.S = S;
+    buildEco();
+    edited();
+  });
+  $("preset-save").onclick = () => {
+    const name = $("preset-name").value.trim();
+    if (!name) return say("Type a name for the preset first.");
+    if (DATA.rules[name]) return say(`“${name}” is a built-in preset; pick another name.`);
+    const all = savedPresets();
+    all[name] = rulesJSON(name);
+    if (!storePresets(all)) return say("This browser won't store presets on this page.");
+    ecoKey = "s:" + name;
+    buildPresets();
+    say(`Saved “${name}”. It stays in this browser.`);
+  };
+  $("preset-del").onclick = () => {
+    if (!ecoKey.startsWith("s:")) return;
+    const all = savedPresets(), name = ecoKey.slice(2);
+    delete all[name];
+    storePresets(all);
+    ecoKey = "";
+    buildPresets();
+    say(`Deleted “${name}”. Its rules stay in force until you change them.`);
+  };
+  $("preset-export").onclick = async () => {
+    const text = JSON.stringify(rulesJSON(ecoKey ? ecoKey.slice(2) : $("preset-name").value.trim() || "custom"));
+    const box = $("presetbox");
+    box.value = text; box.hidden = false; box.select();
+    try {
+      await navigator.clipboard.writeText(text);
+      say("Copied the rules as JSON; they are also below.");
+    } catch {
+      say("The rules are selected below; copy them with your keyboard.");
+    }
+  };
+  $("preset-import").onclick = () => {
+    const box = $("presetbox");
+    if (box.hidden || !box.value.trim()) {
+      box.hidden = false; box.value = ""; box.focus();
+      return say("Paste a preset's JSON (or a copied setup) below, then press Import again.");
+    }
+    let r;
+    try { r = readRules(JSON.parse(box.value)); } catch (err) { return say(`That isn't a preset: ${err.message}.`); }
+    let name = String(r.name || "").trim() || "imported";
+    if (DATA.rules[name]) name += " (imported)";
+    setRules(r, "s:" + name);
+    const all = savedPresets();
+    all[name] = rulesJSON(name);
+    storePresets(all);
+    buildPresets();
+    box.hidden = true;
+    playing = true;
+    restart();
+    hint(`Imported and saved “${name}”.`);
+  };
+  $("mix").onclick = () => {
+    setup.species = dealt(setup.p.length / 2);
+    playing = true;
+    restart();
+    say(eco.S > 1 ? `Dealt the particles out to ${eco.S} species in turn.` : "There is only one species; raise the count first.");
+  };
+
   $("play").onclick = () => {
     if (finished) { playing = true; restart(); }
     else playing = !playing;
     updateReadout();
   };
   $("restart").onclick = () => { playing = true; restart(); };
-  $("random").onclick = () => { playing = true; loadSetup(randomSetup(Math.floor(Math.random() * 1e6))); };
+  $("random").onclick = () => {
+    playing = true;
+    const s = randomSetup(Math.floor(Math.random() * 1e6));
+    loadSetup({ ...s, species: dealt(s.p.length / 2) }, { keepRules: true });
+  };
   $("clear").onclick = () => {
     playing = true;
-    loadSetup({ name: "your setup", desc: "Click the canvas to add rings.", p: [], v: [], steps: 1200, half: 24, cmap: "hsv" });
+    loadSetup({ name: "your setup", desc: "Click the canvas to add rings.", p: [], v: [], species: [], steps: 1200, half: 24, cmap: "hsv" },
+      { keepRules: true });
   };
   document.addEventListener("keydown", (e) => {
-    const tag = document.activeElement.tagName;
-    if (tag === "TEXTAREA" || e.metaKey || e.ctrlKey || e.altKey) return;
+    const el = document.activeElement, tag = el.tagName;
+    if (tag === "TEXTAREA" || tag === "SELECT" || (tag === "INPUT" && !/range|color/.test(el.type))) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.code === "Space") {
       if (!/INPUT|BUTTON/.test(tag)) { e.preventDefault(); $("play").click(); }
     } else if (e.key === "," || e.key === ".") nudge("speed", e.key === "." ? 1 : -1);
@@ -759,16 +1207,20 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
     const n = +$("ring-n").value, r = +$("ring-r").value, spin = +$("ring-s").value;
     const add = { p: [], v: [] };
     ringPts(add, n, r, cx, cy, spin, 0, 0, vx, vy);
+    const k = Math.min(ui.ringSp, eco.S - 1);
     if (ui.mode === "still") {
       const base = setup.name.startsWith("your") ? setup : { ...setup, name: "your setup", desc: `${setup.name} plus your rings`, score: null };
+      const species = (setup.species || new Array(setup.p.length / 2).fill(0)).concat(new Array(n).fill(k));
       playing = true;
-      loadSetup({ ...base, p: setup.p.concat(add.p), v: setup.v.concat(add.v) }, { keepLength: true, keepView: true });
+      loadSetup({ ...base, p: setup.p.concat(add.p), v: setup.v.concat(add.v), species },
+        { keepLength: true, keepView: true, keepRules: true });
     } else {
       const s = sim, n0 = s.n, m = n0 + n;
       const grow = (a, extra) => { const b = new Float64Array(m); b.set(a); b.set(extra, n0); return b; };
       s.x = grow(s.x, add.p.filter((_, i) => i % 2 === 0)); s.y = grow(s.y, add.p.filter((_, i) => i % 2 === 1));
       s.vx = grow(s.vx, add.v.filter((_, i) => i % 2 === 0)); s.vy = grow(s.vy, add.v.filter((_, i) => i % 2 === 1));
       s.ax = new Float64Array(m); s.ay = new Float64Array(m); s.n = m;
+      const sp = new Int32Array(m); sp.set(s.sp); sp.fill(k, n0); s.sp = sp;
       updateReadout();
     }
   }
@@ -778,7 +1230,10 @@ textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font
   $("zoom-level").onclick = () => fitView();
 
   $("copy").onclick = async () => {
-    const text = JSON.stringify({ name: setup.name, steps: ui.len, pull: ui.gScale, push: ui.cScale, pos: pairs(setup.p, 3), vel: pairs(setup.v, 1) });
+    const n = setup.p.length / 2;
+    const species = Array.from({ length: n }, (_, i) => (setup.species ? setup.species[i] % eco.S : 0));
+    const text = JSON.stringify({ name: setup.name, steps: ui.len, pull: ui.gScale, push: ui.cScale, pos: pairs(setup.p, 3), vel: pairs(setup.v, 1),
+      species, rules: rulesJSON(ecoKey ? ecoKey.slice(2) : "custom") });
     try {
       await navigator.clipboard.writeText(text);
       $("copy-note").textContent = `Copied ${setup.p.length / 2} particles.`;
