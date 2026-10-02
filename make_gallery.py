@@ -27,9 +27,8 @@ def trajectory(name):
     return data
 
 
-def render(name, size=8, dpi=200):
-    data = trajectory(name)
-    _, _, _, half, cmap = SCENES[name]()
+def draw(data, half, cmap, path, size=8, dpi=200):
+    """Save a still of logged positions data (frames, n, 2) centred on the origin."""
     frames = len(data)
     t = np.repeat(np.linspace(0, 1, frames), data.shape[1])
     xy = data.reshape(-1, 2)
@@ -44,8 +43,13 @@ def render(name, size=8, dpi=200):
     ax.set_ylim(-half, half)
     ax.set_aspect("equal")
     ax.axis("off")
-    fig.savefig(os.path.join(OUT, name + ".png"), facecolor="black")
+    fig.savefig(path, facecolor="black")
     plt.close(fig)
+
+
+def render(name, size=8, dpi=200):
+    _, _, _, half, cmap = SCENES[name]()
+    draw(trajectory(name), half, cmap, os.path.join(OUT, name + ".png"), size, dpi)
 
 
 if __name__ == "__main__":

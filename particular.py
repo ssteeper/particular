@@ -179,6 +179,73 @@ def scene_constellation():
     return (*_join(*parts), 1100, 30, "hsv")
 
 
+# Random setups for search.py. Every setup is built from a seed so it can be rebuilt.
+MIN_GAP = 0.8      # closest allowed starting spacing; tighter packing explodes on step one
+
+
+def _rot(xy, ang):
+    c, s = np.cos(ang), np.sin(ang)
+    return np.c_[c * xy[:, 0] - s * xy[:, 1], s * xy[:, 0] + c * xy[:, 1]]
+
+
+def random_setup(seed):
+    """Return (pos, vel, description) for a random arrangement with k-fold symmetry."""
+    rng = np.random.default_rng(seed)
+    while True:                                          # retry until there are enough particles
+        pos, vel, desc = _random_pieces(rng)
+        if len(pos) >= 40:
+            break
+    # drop particles that start on top of an earlier one
+    gap = np.sqrt(((pos[:, None] - pos[None]) ** 2).sum(-1))
+    keep = ~np.any(np.tril(gap < 0.3, -1), axis=1)
+    pos, vel = pos[keep], vel[keep]
+    if len(pos) > 260:
+        idx = np.sort(rng.choice(len(pos), 260, replace=False))
+        pos, vel = pos[idx], vel[idx]
+    pos -= pos.mean(0)
+    vel -= vel.mean(0)                                   # no net drift out of frame
+    return pos, vel, desc
+
+
+def _random_pieces(rng):
+    k = int(rng.choice([1, 2, 3, 4, 5, 6], p=[0.1, 0.18, 0.2, 0.2, 0.16, 0.16]))
+    pieces, desc = [], []
+    for _ in range(int(rng.integers(1, 4))):
+        kind = rng.choice(["ring", "satellites", "spokes"], p=[0.4, 0.4, 0.2])
+        if kind == "ring":
+            radius = rng.uniform(3, 18)
+            n = min(int(rng.integers(20, 90)), int(2 * np.pi * radius / MIN_GAP))
+            radial = rng.uniform(-400, 1400) if rng.random() < 0.5 else 0.0
+            pieces.append(ring(n, radius, spin=rng.uniform(-250, 250), radial=radial,
+                               phase=rng.uniform(0, 2 * np.pi)))
+            desc.append(f"ring n={n} r={radius:.1f}")
+        elif kind == "satellites":
+            r = rng.uniform(2, 6)
+            n = min(int(rng.integers(8, 36)), int(2 * np.pi * r / MIN_GAP))
+            dist, orbit = rng.uniform(8, 20), rng.uniform(-1500, 1500)
+            inward, spin = rng.uniform(-500, 500), rng.uniform(-400, 400)
+            alternate = rng.random() < 0.4
+            off = rng.uniform(0, 2 * np.pi)
+            for j in range(k):
+                a = off + 2 * np.pi * j / k
+                u, t = np.array([np.cos(a), np.sin(a)]), np.array([-np.sin(a), np.cos(a)])
+                pieces.append(ring(n, r, center=dist * u, spin=-spin if alternate and j % 2 else spin,
+                                   vel=orbit * t - inward * u, phase=a))
+            desc.append(f"{k} satellites n={n} r={r:.1f}")
+        else:
+            m = int(rng.integers(6, 18))
+            d = np.linspace(rng.uniform(1, 6), rng.uniform(10, 22), m)
+            bend, swirl, radial = rng.uniform(-0.6, 0.6), rng.uniform(-150, 150), rng.uniform(-300, 800)
+            off = rng.uniform(0, 2 * np.pi)
+            for j in range(k):
+                a = off + 2 * np.pi * j / k + bend * (d - d[0]) / d[-1]
+                u, t = np.c_[np.cos(a), np.sin(a)], np.c_[-np.sin(a), np.cos(a)]
+                pieces.append((d[:, None] * u, (swirl * d)[:, None] * t + radial * u))
+            desc.append(f"{k} spokes m={m}")
+    pos, vel = _join(*pieces)
+    return pos, vel, ", ".join(desc)
+
+
 SCENES = {
     "spiral": scene_spiral,
     "counter": scene_counter,
