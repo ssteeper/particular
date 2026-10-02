@@ -1,0 +1,801 @@
+<title>Particular Sandbox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one square canvas as the stage, a narrow instrument panel beside it (below it on phones). */
+:root {
+  color-scheme: dark;
+  --ground: #050507;
+  --panel: #0c0d12;
+  --raise: #15171f;
+  --line: #242733;
+  --ink: #dcdee8;
+  --muted: #858a9e;
+  --accent: #b9c3ff;
+  --accent-ink: #0b0d18;
+  --glass: rgba(12, 13, 18, 0.78);
+  --font-ui: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --step--1: 0.78rem;
+  --step-0: 0.9rem;
+  --step-1: 1.05rem;
+  --step-3: 1.6rem;
+  --radius: 6px;
+}
+html, body { height: 100%; }
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--step-0);
+  line-height: 1.45;
+}
+.app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 20px;
+  padding-inline: 16px;
+  padding-block: 16px;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+.stage {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.frame {
+  position: relative;
+  width: min(100%, calc(100vh - 32px));
+  aspect-ratio: 1;
+  max-width: 100%;
+}
+canvas#view {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #000;
+  border-radius: var(--radius);
+  touch-action: none;
+  cursor: crosshair;
+}
+.readout {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-data);
+  font-size: var(--step--1);
+  color: var(--muted);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.zoom {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 4px;
+}
+.zoom button {
+  background: var(--glass);
+  font-family: var(--font-data);
+  font-size: var(--step--1);
+  padding: 4px 0;
+  min-width: 2.6em;
+  font-variant-numeric: tabular-nums;
+}
+#zoom-level { min-width: 3.8em; }
+.panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 16px;
+  align-self: start;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+h1 {
+  font-size: var(--step-3);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  margin: 0;
+  text-wrap: balance;
+}
+.lede { margin: 6px 0 0; color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 10px; }
+h2 {
+  font-size: var(--step--1);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin: 0;
+}
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+button {
+  font: inherit;
+  color: var(--ink);
+  background: var(--raise);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 7px 12px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--muted); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; min-width: 5em; }
+.tabs { display: flex; gap: 4px; background: var(--raise); padding: 3px; border-radius: var(--radius); }
+.tabs button { flex: 1; border: 0; background: transparent; padding: 5px 8px; color: var(--muted); }
+.tabs button[aria-selected="true"] { background: var(--line); color: var(--ink); }
+.thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+.thumb {
+  padding: 0;
+  border: 1px solid var(--line);
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.thumb img { width: 100%; aspect-ratio: 1; display: block; }
+.thumb span {
+  font-family: var(--font-data);
+  font-size: 0.66rem;
+  color: var(--muted);
+  padding: 3px 4px 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.thumb[aria-pressed="true"] { border-color: var(--accent); }
+.thumb[aria-pressed="true"] span { color: var(--ink); }
+.note { margin: 0; color: var(--muted); font-size: var(--step--1); }
+.field { display: grid; grid-template-columns: 6.5em minmax(0, 1fr) 3.6em; align-items: center; gap: 8px; }
+.field label { color: var(--ink); }
+.field output { font-family: var(--font-data); font-size: var(--step--1); color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.seg { display: flex; gap: 4px; flex-wrap: wrap; }
+.seg button { padding: 5px 10px; color: var(--muted); }
+.seg button[aria-pressed="true"] { color: var(--ink); border-color: var(--accent); }
+.desc { font-family: var(--font-data); font-size: var(--step--1); color: var(--muted); margin: 0; overflow-wrap: anywhere; }
+textarea#copybox { width: 100%; height: 6em; font-family: var(--font-data); font-size: 0.7rem; background: var(--raise); color: var(--ink); border: 1px solid var(--line); border-radius: var(--radius); box-sizing: border-box; }
+@media (max-width: 860px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .frame { width: 100%; }
+  .panel { max-height: none; }
+}
+</style>
+
+<div class="app">
+  <div class="stage">
+    <div class="frame">
+      <canvas id="view" aria-label="Particle simulation. Click to add a ring and drag to throw it. Scroll or pinch to zoom."></canvas>
+      <div class="zoom" role="group" aria-label="Zoom">
+        <button id="zoom-out" aria-label="Zoom out">−</button>
+        <button id="zoom-level" title="Fit the setup in view">1.0×</button>
+        <button id="zoom-in" aria-label="Zoom in">+</button>
+      </div>
+      <div class="readout"><span id="r-count">0 particles</span><span id="r-step">step 0</span></div>
+    </div>
+  </div>
+
+  <aside class="panel">
+    <header>
+      <h1>particular</h1>
+      <p class="lede">Particles pull on each other from far away and push apart up close. Pick a starting setup, change the forces, or click the canvas to add a ring.</p>
+    </header>
+
+    <section aria-label="Playback">
+      <div class="row">
+        <button id="play" class="primary">Pause</button>
+        <button id="restart">Restart</button>
+        <button id="random">Random</button>
+        <button id="clear">Clear</button>
+      </div>
+      <div class="field"><label for="speed">Speed</label><input type="range" id="speed" min="-4" max="4" step="0.5" value="1"><output id="speed-out">2×</output></div>
+      <p class="desc" id="setup-desc"></p>
+    </section>
+
+    <section aria-label="Starting setups">
+      <h2>Starting setups</h2>
+      <div class="tabs" role="tablist">
+        <button role="tab" id="tab-made" aria-selected="true">Hand-made</button>
+        <button role="tab" id="tab-found" aria-selected="false">Found by search</button>
+      </div>
+      <div class="thumbs" id="thumbs"></div>
+      <p class="note" id="group-note"></p>
+    </section>
+
+    <section aria-label="Forces">
+      <h2>Forces</h2>
+      <div class="field"><label for="g">Pull</label><input type="range" id="g" min="-2" max="2" step="0.05" value="0"><output id="g-out">1.00×</output></div>
+      <div class="field"><label for="c">Push</label><input type="range" id="c" min="-2" max="2" step="0.05" value="0"><output id="c-out">1.00×</output></div>
+      <p class="note">Pull falls off with distance squared, push with distance cubed, so particles settle about <strong id="spacing">2.0</strong> units apart.</p>
+    </section>
+
+    <section aria-label="Drawing">
+      <h2>Drawing</h2>
+      <div class="seg" id="mode">
+        <button data-v="still" aria-pressed="true">Still</button>
+        <button data-v="live" aria-pressed="false">Live</button>
+      </div>
+      <p class="note" id="mode-note"></p>
+      <div class="seg" id="color">
+        <button data-v="time" aria-pressed="true">Color by time</button>
+        <button data-v="particle" aria-pressed="false">by particle</button>
+        <button data-v="speed" aria-pressed="false">by speed</button>
+      </div>
+      <div class="field"><label for="len">Length</label><input type="range" id="len" min="200" max="3000" step="100" value="1000"><output id="len-out">1000</output></div>
+      <div class="field"><label for="dot">Dot size</label><input type="range" id="dot" min="0.5" max="3" step="0.1" value="1.2"><output id="dot-out">1.2</output></div>
+    </section>
+
+    <section aria-label="Add a ring">
+      <h2>Add a ring</h2>
+      <div class="field"><label for="ring-n">Particles</label><input type="range" id="ring-n" min="6" max="80" step="1" value="30"><output id="ring-n-out">30</output></div>
+      <div class="field"><label for="ring-r">Radius</label><input type="range" id="ring-r" min="1" max="15" step="0.5" value="5"><output id="ring-r-out">5</output></div>
+      <div class="field"><label for="ring-s">Spin</label><input type="range" id="ring-s" min="-400" max="400" step="10" value="200"><output id="ring-s-out">200</output></div>
+      <p class="note" id="add-note"></p>
+    </section>
+
+    <section aria-label="View">
+      <h2>View</h2>
+      <p class="note">Scroll or pinch to zoom. Shift-drag, right-drag or drag with two fingers to move around. Keys: space plays or pauses, comma and period change speed, plus and minus zoom, 0 fits the setup.</p>
+    </section>
+
+    <section aria-label="Export">
+      <div class="row"><button id="copy">Copy setup as JSON</button></div>
+      <p class="note" id="copy-note">Positions and velocities at the start of the run, to paste into Python.</p>
+      <textarea id="copybox" hidden readonly></textarea>
+    </section>
+  </aside>
+</div>
+
+<script>
+/*DATA*/
+(() => {
+  const G0 = 5e6, C0 = 1e7, DT = 1e-5, LOG = 10;
+  const canvas = document.getElementById("view");
+  const ctx = canvas.getContext("2d");
+  const trail = document.createElement("canvas");
+  const tctx = trail.getContext("2d");
+  const $ = (id) => document.getElementById(id);
+
+  const luts = {};
+  for (const [name, hex] of Object.entries(DATA.cmaps)) {
+    const n = hex.length / 6, arr = [];
+    for (let i = 0; i < n; i++) arr.push([0, 2, 4].map((k) => parseInt(hex.substr(i * 6 + k, 2), 16)));
+    luts[name] = arr;
+  }
+  const cmap = (name, t) => {
+    const lut = luts[name] || luts.hsv;
+    return lut[Math.max(0, Math.min(lut.length - 1, Math.round(t * (lut.length - 1))))];
+  };
+
+  // ---------------------------------------------------------------- state
+  const BASE_STEPS = 10;     // simulation steps per screen frame at 1× speed
+  const LIVE_FADE = 0.965;   // share of an older snapshot's ink left after each new one in Live mode
+  const LIVE_KEEP = 160;     // snapshots kept for redraws in Live mode; older ones have faded out
+  const BUCKETS = 128;       // colors per snapshot; dots of one color are filled together
+  const ui = { mode: "still", color: "time", group: "made", gScale: 1, cScale: 1, speed: 2, dot: 1.2, len: 1000 };
+  let setup = null;          // {name, p: [x,y,...], v: [...], steps, half, cmap, desc}
+  let sim = null;            // live arrays
+  let history = [];          // logged snapshots, kept so the trails can be redrawn at a new zoom
+  let playing = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let finished = false;
+  let speedScale = 1;
+  let budget = 0;            // steps owed to the simulation; fractional at slow speeds
+  const view = { cx: 0, cy: 0, half: 20 };
+  let W = 0, scale = 1, dirty = false;
+
+  function loadSetup(s, opts = {}) {
+    setup = { ...s, p: s.p.slice(), v: s.v.slice() };
+    if (!opts.keepLength) {
+      ui.len = s.steps;
+      $("len").value = s.steps;
+      $("len-out").textContent = s.steps;
+    }
+    if (!opts.keepView) fitView();
+    restart();
+    describe();
+  }
+
+  function restart() {
+    const n = setup.p.length / 2;
+    sim = {
+      n,
+      x: new Float64Array(n), y: new Float64Array(n),
+      vx: new Float64Array(n), vy: new Float64Array(n),
+      ax: new Float64Array(n), ay: new Float64Array(n),
+      step: 0,
+    };
+    for (let i = 0; i < n; i++) {
+      sim.x[i] = setup.p[2 * i]; sim.y[i] = setup.p[2 * i + 1];
+      sim.vx[i] = setup.v[2 * i]; sim.vy[i] = setup.v[2 * i + 1];
+    }
+    speedScale = 0;
+    for (let i = 0; i < n; i++) speedScale = Math.max(speedScale, Math.hypot(sim.vx[i], sim.vy[i]));
+    speedScale = speedScale || 1000;
+    finished = false;
+    budget = 0;
+    history = [];
+    resize();
+    clearTrail();
+    logSnapshot();
+    updateReadout();
+  }
+
+  function stepSim(count) {
+    const { n, x, y, vx, vy, ax, ay } = sim;
+    const g = G0 * ui.gScale, c = C0 * ui.cScale;
+    for (let s = 0; s < count; s++) {
+      ax.fill(0); ay.fill(0);
+      for (let i = 0; i < n; i++) {
+        const xi = x[i], yi = y[i];
+        let axi = 0, ayi = 0;
+        for (let j = i + 1; j < n; j++) {
+          const dx = xi - x[j], dy = yi - y[j];
+          const r2 = dx * dx + dy * dy;
+          if (r2 === 0) continue;
+          const r = Math.sqrt(r2);
+          const coef = -g / (r2 * r) + c / (r2 * r2);
+          const fx = coef * dx, fy = coef * dy;
+          axi += fx; ayi += fy;
+          ax[j] -= fx; ay[j] -= fy;
+        }
+        ax[i] += axi; ay[i] += ayi;
+      }
+      for (let i = 0; i < n; i++) {
+        vx[i] += ax[i] * DT; vy[i] += ay[i] * DT;
+        x[i] += vx[i] * DT; y[i] += vy[i] * DT;
+      }
+      sim.step++;
+    }
+  }
+
+  // ------------------------------------------------------------- drawing
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const size = Math.round(canvas.clientWidth * dpr);
+    if (size && size !== W) {
+      W = size;
+      canvas.width = canvas.height = trail.width = trail.height = W;
+      dirty = true;
+    }
+    scale = W / 2 / view.half;
+  }
+  const toPx = (x) => W / 2 + (x - view.cx) * scale;
+  const toPy = (y) => W / 2 - (y - view.cy) * scale;
+  const dotRadius = () => Math.max(0.6, ui.dot * W / 1000 * 1.6);
+
+  function clearTrail() {
+    tctx.globalAlpha = 1;
+    tctx.fillStyle = "#000";
+    tctx.fillRect(0, 0, W, W);
+  }
+
+  function logSnapshot() {
+    const { n, x, y, vx, vy } = sim;
+    const xy = new Float32Array(2 * n), sp = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      xy[2 * i] = x[i]; xy[2 * i + 1] = y[i];
+      sp[i] = Math.min(1, Math.hypot(vx[i], vy[i]) / speedScale);
+    }
+    const snap = { step: sim.step, xy, sp };
+    history.push(snap);
+    if (ui.mode === "live") {
+      if (history.length > LIVE_KEEP) history.shift();
+      tctx.globalAlpha = 1;
+      tctx.fillStyle = `rgba(0,0,0,${1 - LIVE_FADE})`;
+      tctx.fillRect(0, 0, W, W);
+    }
+    drawSnapshot(snap, 0);
+  }
+
+  // age counts the snapshots logged after this one; Live mode fades by age
+  function drawSnapshot(snap, age) {
+    let alpha, tTime;
+    if (ui.mode === "still") {
+      tTime = Math.min(snap.step / ui.len, 1);
+      alpha = 1 - tTime;
+    } else {
+      tTime = (snap.step / 1500) % 1;
+      alpha = 0.85 * LIVE_FADE ** age;
+    }
+    if (alpha <= 0.002) return;
+    const r = dotRadius(), xy = snap.xy, n = snap.sp.length;
+    const paths = [];
+    for (let i = 0; i < n; i++) {
+      const px = toPx(xy[2 * i]), py = toPy(xy[2 * i + 1]);
+      if (px < -r || py < -r || px > W + r || py > W + r) continue;
+      const t = ui.color === "time" ? tTime : ui.color === "particle" ? i / Math.max(1, n - 1) : snap.sp[i];
+      const b = Math.round(t * (BUCKETS - 1));
+      const path = paths[b] || (paths[b] = new Path2D());
+      path.moveTo(px + r, py);
+      path.arc(px, py, r, 0, 6.2832);
+    }
+    tctx.globalAlpha = alpha;
+    paths.forEach((path, b) => {
+      const c = cmap(setup.cmap, b / (BUCKETS - 1));
+      tctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+      tctx.fill(path);
+    });
+    tctx.globalAlpha = 1;
+  }
+
+  function redrawTrail() {
+    dirty = false;
+    clearTrail();
+    const last = history.length - 1;
+    history.forEach((snap, i) => drawSnapshot(snap, last - i));
+  }
+
+  // ---------------------------------------------------------------- view
+  function fitView() {
+    view.cx = 0; view.cy = 0; view.half = setup.half;
+    afterView();
+  }
+  function afterView() {
+    scale = W / 2 / view.half;
+    dirty = true;
+    const z = setup.half / view.half;
+    $("zoom-level").textContent = (z < 9.95 ? z.toFixed(1) : Math.round(z)) + "×";
+  }
+  // keep the world point under (px, py) fixed while zooming
+  function zoomAt(px, py, factor) {
+    const wx = view.cx + (px - W / 2) / scale, wy = view.cy - (py - W / 2) / scale;
+    view.half = Math.min(setup.half * 8, Math.max(setup.half / 50, view.half / factor));
+    scale = W / 2 / view.half;
+    view.cx = wx - (px - W / 2) / scale;
+    view.cy = wy + (py - W / 2) / scale;
+    afterView();
+  }
+  function panBy(dx, dy) {
+    view.cx -= dx / scale;
+    view.cy += dy / scale;
+    afterView();
+  }
+
+  let drag = null;
+  function render() {
+    if (dirty) redrawTrail();
+    ctx.drawImage(trail, 0, 0);
+    if (!finished && sim.n) {
+      const { n, x, y } = sim;
+      const r = Math.max(1, dotRadius());
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) {
+        const px = toPx(x[i]), py = toPy(y[i]);
+        if (px < -r || py < -r || px > W + r || py > W + r) continue;
+        ctx.moveTo(px + r, py); ctx.arc(px, py, r, 0, 6.2832);
+      }
+      ctx.fill();
+    }
+    if (drag) {
+      const rr = +$("ring-r").value * scale;
+      ctx.strokeStyle = "rgba(185,195,255,0.8)";
+      ctx.lineWidth = Math.max(1, W / 600);
+      ctx.beginPath(); ctx.arc(drag.x0, drag.y0, rr, 0, 6.2832); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(drag.x0, drag.y0); ctx.lineTo(drag.x1, drag.y1); ctx.stroke();
+    }
+  }
+
+  function frame() {
+    if (playing && !finished && sim.n) {
+      budget += BASE_STEPS * ui.speed;
+      let todo = Math.floor(budget);
+      budget -= todo;
+      while (todo > 0) {
+        const k = Math.min(todo, LOG - (sim.step % LOG));   // never step past a snapshot
+        stepSim(k);
+        todo -= k;
+        if (sim.step % LOG === 0) {
+          logSnapshot();
+          if (ui.mode === "still" && sim.step >= ui.len) { finished = true; playing = false; break; }
+        }
+      }
+      updateReadout();
+    }
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  function updateReadout() {
+    $("r-count").textContent = `${sim.n} particles`;
+    $("r-step").textContent = ui.mode === "still" ? `step ${sim.step} / ${ui.len}` : `step ${sim.step}`;
+    $("play").textContent = playing ? "Pause" : finished ? "Replay" : "Play";
+  }
+
+  function describe() {
+    const parts = [setup.name];
+    if (setup.desc) parts.push(setup.desc);
+    if (setup.score != null) parts.push(`score ${setup.score.toFixed(2)}`);
+    $("setup-desc").textContent = parts.join(" · ");
+    document.querySelectorAll(".thumb").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.name === setup.name)));
+  }
+
+  // ------------------------------------------------------------ random
+  function mulberry32(a) {
+    return () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  function ringPts(out, n, radius, cx, cy, spin, radial, phase, vx, vy) {
+    for (let i = 0; i < n; i++) {
+      const th = phase + 2 * Math.PI * i / n, c = Math.cos(th), s = Math.sin(th);
+      out.p.push(cx + radius * c, cy + radius * s);
+      out.v.push(-s * spin * radius + c * radial + vx, c * spin * radius + s * radial + vy);
+    }
+  }
+  function randomSetup(seed) {
+    const rnd = mulberry32(seed);
+    const U = (a, b) => a + (b - a) * rnd();
+    const I = (a, b) => Math.floor(U(a, b));
+    let out, desc;
+    do {
+      out = { p: [], v: [] }; desc = [];
+      const k = [1, 2, 2, 3, 3, 4, 4, 5, 6, 6][I(0, 10)];
+      const pieces = I(1, 4);
+      for (let q = 0; q < pieces; q++) {
+        const roll = rnd();
+        if (roll < 0.4) {
+          const radius = U(3, 18), n = Math.min(I(20, 90), Math.floor(2 * Math.PI * radius / 0.8));
+          ringPts(out, n, radius, 0, 0, U(-250, 250), rnd() < 0.5 ? U(-400, 1400) : 0, U(0, 6.28), 0, 0);
+          desc.push(`ring n=${n} r=${radius.toFixed(1)}`);
+        } else if (roll < 0.8) {
+          const r = U(2, 6), n = Math.min(I(8, 36), Math.floor(2 * Math.PI * r / 0.8));
+          const dist = U(8, 20), orbit = U(-1500, 1500), inward = U(-500, 500), spin = U(-400, 400);
+          const alternate = rnd() < 0.4, off = U(0, 6.28);
+          for (let j = 0; j < k; j++) {
+            const a = off + 2 * Math.PI * j / k, ux = Math.cos(a), uy = Math.sin(a);
+            ringPts(out, n, r, dist * ux, dist * uy, alternate && j % 2 ? -spin : spin, 0, a,
+              -orbit * uy - inward * ux, orbit * ux - inward * uy);
+          }
+          desc.push(`${k} satellites n=${n} r=${r.toFixed(1)}`);
+        } else {
+          const m = I(6, 18), d0 = U(1, 6), d1 = U(10, 22);
+          const bend = U(-0.6, 0.6), swirl = U(-150, 150), radial = U(-300, 800), off = U(0, 6.28);
+          for (let j = 0; j < k; j++) {
+            for (let i = 0; i < m; i++) {
+              const d = d0 + (d1 - d0) * i / (m - 1);
+              const a = off + 2 * Math.PI * j / k + bend * (d - d0) / d1;
+              const ux = Math.cos(a), uy = Math.sin(a);
+              out.p.push(d * ux, d * uy);
+              out.v.push(-uy * swirl * d + radial * ux, ux * swirl * d + radial * uy);
+            }
+          }
+          desc.push(`${k} spokes m=${m}`);
+        }
+      }
+    } while (out.p.length / 2 < 40);
+    // drop particles sitting on top of an earlier one, then remove drift
+    const p = [], v = [];
+    for (let i = 0; i < out.p.length / 2; i++) {
+      let clash = false;
+      for (let j = 0; j < p.length / 2; j++) if (Math.hypot(out.p[2 * i] - p[2 * j], out.p[2 * i + 1] - p[2 * j + 1]) < 0.3) { clash = true; break; }
+      if (!clash && p.length / 2 < 260) { p.push(out.p[2 * i], out.p[2 * i + 1]); v.push(out.v[2 * i], out.v[2 * i + 1]); }
+    }
+    centre(p, v);
+    let ext = 0;
+    for (let i = 0; i < p.length; i++) ext = Math.max(ext, Math.abs(p[i]));
+    return { name: `random ${seed}`, desc: desc.join(", "), p, v, steps: 1000, half: Math.max(14, ext * 1.5), cmap: "hsv" };
+  }
+  function centre(p, v) {
+    const n = p.length / 2;
+    if (!n) return;
+    let mx = 0, my = 0, mvx = 0, mvy = 0;
+    for (let i = 0; i < n; i++) { mx += p[2 * i]; my += p[2 * i + 1]; mvx += v[2 * i]; mvy += v[2 * i + 1]; }
+    for (let i = 0; i < n; i++) { p[2 * i] -= mx / n; p[2 * i + 1] -= my / n; v[2 * i] -= mvx / n; v[2 * i + 1] -= mvy / n; }
+  }
+
+  // ---------------------------------------------------------- controls
+  function buildThumbs() {
+    const box = $("thumbs");
+    box.textContent = "";
+    for (const s of DATA.scenes.filter((s) => s.group === ui.group)) {
+      const b = document.createElement("button");
+      b.className = "thumb";
+      b.dataset.name = s.name;
+      b.setAttribute("aria-pressed", String(setup && setup.name === s.name));
+      b.title = s.desc || s.name;
+      const img = document.createElement("img");
+      img.src = s.thumb; img.alt = "";
+      const label = document.createElement("span");
+      label.textContent = s.name;
+      b.append(img, label);
+      b.addEventListener("click", () => { playing = true; loadSetup(s); });
+      box.append(b);
+    }
+    $("group-note").textContent = ui.group === "made"
+      ? "Setups designed by hand. The first is the original notebook's spiral."
+      : "Picked by search.py from 800 random setups, scored on how much of the frame they fill, symmetry, smooth motion, and how few particles fly off.";
+  }
+  function setTab(group) {
+    ui.group = group;
+    $("tab-made").setAttribute("aria-selected", String(group === "made"));
+    $("tab-found").setAttribute("aria-selected", String(group === "found"));
+    buildThumbs();
+  }
+  $("tab-made").onclick = () => setTab("made");
+  $("tab-found").onclick = () => setTab("found");
+
+  function segment(id, key, after) {
+    const box = $(id);
+    box.addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      ui[key] = b.dataset.v;
+      box.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      after && after();
+    });
+  }
+  segment("mode", "mode", () => { notes(); playing = true; restart(); });
+  segment("color", "color", () => { dirty = true; });
+
+  function slider(id, fmt, apply) {
+    const el = $(id), out = $(id + "-out");
+    const update = () => { out.textContent = fmt(+el.value); apply && apply(+el.value); };
+    el.addEventListener("input", update);
+    update();
+  }
+  slider("g", (v) => (2 ** v).toFixed(2) + "×", (v) => { ui.gScale = 2 ** v; spacing(); });
+  slider("c", (v) => (2 ** v).toFixed(2) + "×", (v) => { ui.cScale = 2 ** v; spacing(); });
+  slider("speed", (v) => +(2 ** v).toPrecision(2) + "×", (v) => { ui.speed = 2 ** v; });
+  slider("dot", (v) => v.toFixed(1), (v) => { ui.dot = v; dirty = true; });
+  slider("len", (v) => String(v), (v) => { ui.len = v; if (sim) { finished = sim.step >= v && ui.mode === "still"; dirty = true; updateReadout(); } });
+  slider("ring-n", (v) => String(v));
+  slider("ring-r", (v) => String(v));
+  slider("ring-s", (v) => String(v));
+  $("g").addEventListener("change", () => { playing = true; restart(); });
+  $("c").addEventListener("change", () => { playing = true; restart(); });
+  $("len").addEventListener("change", () => { if (ui.mode === "still") { playing = true; restart(); } });
+  function spacing() { $("spacing").textContent = (C0 * ui.cScale / (G0 * ui.gScale)).toFixed(1); }
+  function notes() {
+    $("mode-note").textContent = ui.mode === "still"
+      ? "Runs for the set length and fades later trails, like the notebook's plots."
+      : "Runs until you stop it. Old trails fade away and the colors cycle.";
+    $("add-note").textContent = ui.mode === "still"
+      ? "Click the canvas to add a ring to the starting setup; drag to throw it. The run starts over."
+      : "Click the canvas to drop a ring into the running simulation; drag to throw it.";
+  }
+
+  $("play").onclick = () => {
+    if (finished) { playing = true; restart(); }
+    else playing = !playing;
+    updateReadout();
+  };
+  $("restart").onclick = () => { playing = true; restart(); };
+  $("random").onclick = () => { playing = true; loadSetup(randomSetup(Math.floor(Math.random() * 1e6))); };
+  $("clear").onclick = () => {
+    playing = true;
+    loadSetup({ name: "your setup", desc: "Click the canvas to add rings.", p: [], v: [], steps: 1200, half: 24, cmap: "hsv" });
+  };
+  document.addEventListener("keydown", (e) => {
+    const tag = document.activeElement.tagName;
+    if (tag === "TEXTAREA" || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.code === "Space") {
+      if (!/INPUT|BUTTON/.test(tag)) { e.preventDefault(); $("play").click(); }
+    } else if (e.key === "," || e.key === ".") nudge("speed", e.key === "." ? 1 : -1);
+    else if (e.key === "+" || e.key === "=") zoomAt(W / 2, W / 2, 1.5);
+    else if (e.key === "-" || e.key === "_") zoomAt(W / 2, W / 2, 1 / 1.5);
+    else if (e.key === "0") fitView();
+  });
+  function nudge(id, dir) {
+    const el = $(id);
+    el.value = +el.value + dir * +el.step;
+    el.dispatchEvent(new Event("input"));
+  }
+
+  // Mouse or one finger: click to add a ring, drag to throw it.
+  // Shift-drag, right-drag or two fingers: pan. Two fingers also pinch to zoom; the wheel zooms.
+  const pointers = new Map();
+  let gesture = null;
+  function canvasPoint(e) {
+    const rect = canvas.getBoundingClientRect();
+    return { x: (e.clientX - rect.left) / rect.width * W, y: (e.clientY - rect.top) / rect.height * W };
+  }
+  function pinchState() {
+    const [a, b] = [...pointers.values()];
+    return { mid: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, dist: Math.hypot(a.x - b.x, a.y - b.y) || 1 };
+  }
+  canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+  canvas.addEventListener("pointerdown", (e) => {
+    const pt = canvasPoint(e);
+    pointers.set(e.pointerId, pt);
+    canvas.setPointerCapture(e.pointerId);
+    if (pointers.size === 2) {
+      drag = null;
+      gesture = { kind: "pinch", ...pinchState() };
+    } else if (pointers.size === 1) {
+      if (e.shiftKey || e.button === 1 || e.button === 2) gesture = { kind: "pan", last: pt };
+      else { gesture = { kind: "ring" }; drag = { x0: pt.x, y0: pt.y, x1: pt.x, y1: pt.y }; }
+    }
+  });
+  canvas.addEventListener("pointermove", (e) => {
+    if (!pointers.has(e.pointerId) || !gesture) return;
+    const pt = canvasPoint(e);
+    pointers.set(e.pointerId, pt);
+    if (gesture.kind === "ring") { drag.x1 = pt.x; drag.y1 = pt.y; }
+    else if (gesture.kind === "pan") { panBy(pt.x - gesture.last.x, pt.y - gesture.last.y); gesture.last = pt; }
+    else if (gesture.kind === "pinch" && pointers.size === 2) {
+      const now = pinchState();
+      zoomAt(now.mid.x, now.mid.y, now.dist / gesture.dist);
+      panBy(now.mid.x - gesture.mid.x, now.mid.y - gesture.mid.y);
+      gesture.mid = now.mid; gesture.dist = now.dist;
+    }
+  });
+  function endPointer(e, cancelled) {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.delete(e.pointerId);
+    if (gesture && gesture.kind === "ring" && drag && !cancelled) addRing();
+    drag = null;
+    gesture = pointers.size === 0 ? null : { kind: "none" };   // a lifted pinch finger does nothing
+  }
+  canvas.addEventListener("pointerup", (e) => endPointer(e, false));
+  canvas.addEventListener("pointercancel", (e) => endPointer(e, true));
+  canvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const pt = canvasPoint(e);
+    const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+    zoomAt(pt.x, pt.y, Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0015)));   // ctrlKey: trackpad pinch
+  }, { passive: false });
+
+  function addRing() {
+    const cx = view.cx + (drag.x0 - W / 2) / scale, cy = view.cy - (drag.y0 - W / 2) / scale;
+    const fit = W / 2 / setup.half;                       // throw speed doesn't depend on zoom
+    const vx = (drag.x1 - drag.x0) / fit * 80, vy = -(drag.y1 - drag.y0) / fit * 80;
+    const n = +$("ring-n").value, r = +$("ring-r").value, spin = +$("ring-s").value;
+    const add = { p: [], v: [] };
+    ringPts(add, n, r, cx, cy, spin, 0, 0, vx, vy);
+    if (ui.mode === "still") {
+      const base = setup.name.startsWith("your") ? setup : { ...setup, name: "your setup", desc: `${setup.name} plus your rings`, score: null };
+      playing = true;
+      loadSetup({ ...base, p: setup.p.concat(add.p), v: setup.v.concat(add.v) }, { keepLength: true, keepView: true });
+    } else {
+      const s = sim, n0 = s.n, m = n0 + n;
+      const grow = (a, extra) => { const b = new Float64Array(m); b.set(a); b.set(extra, n0); return b; };
+      s.x = grow(s.x, add.p.filter((_, i) => i % 2 === 0)); s.y = grow(s.y, add.p.filter((_, i) => i % 2 === 1));
+      s.vx = grow(s.vx, add.v.filter((_, i) => i % 2 === 0)); s.vy = grow(s.vy, add.v.filter((_, i) => i % 2 === 1));
+      s.ax = new Float64Array(m); s.ay = new Float64Array(m); s.n = m;
+      updateReadout();
+    }
+  }
+
+  $("zoom-in").onclick = () => zoomAt(W / 2, W / 2, 1.5);
+  $("zoom-out").onclick = () => zoomAt(W / 2, W / 2, 1 / 1.5);
+  $("zoom-level").onclick = () => fitView();
+
+  $("copy").onclick = async () => {
+    const text = JSON.stringify({ name: setup.name, steps: ui.len, pull: ui.gScale, push: ui.cScale, pos: pairs(setup.p, 3), vel: pairs(setup.v, 1) });
+    try {
+      await navigator.clipboard.writeText(text);
+      $("copy-note").textContent = `Copied ${setup.p.length / 2} particles.`;
+      $("copybox").hidden = true;
+    } catch {
+      $("copybox").value = text; $("copybox").hidden = false; $("copybox").select();
+      $("copy-note").textContent = "Copying was blocked here. The setup is selected below; copy it with your keyboard.";
+    }
+  };
+  const pairs = (a, d) => { const o = []; for (let i = 0; i < a.length; i += 2) o.push([+a[i].toFixed(d), +a[i + 1].toFixed(d)]); return o; };
+
+  new ResizeObserver(() => { if (setup) { resize(); } }).observe(canvas);
+
+  notes();
+  spacing();
+  setTab("made");
+  loadSetup(DATA.scenes[0]);
+  requestAnimationFrame(frame);
+})();
+</script>
