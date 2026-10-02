@@ -1,0 +1,4 @@
+gallery/data/
+__pycache__/
+*.wav
+*.silent.mp4
