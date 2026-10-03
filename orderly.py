@@ -7,8 +7,11 @@ logs it, in chunks of one standard run, until it stops being orderly or reaches 
 orderly at a logged frame if, over the 140 frames (one standard run) ending there:
   - chaos, atlas.measure's mean folded turn of a particle's heading per frame (unweighted here; the
     atlas fades it toward the end of the run), is at most the upper edge of the most orderly chaos bin;
-  - at most half the particles are past 1.6 x the elite's published half-width (atlas.py's escape
-    distance). Particles flying apart barely turn, so chaos alone would call that orderly.
+  - at most 10% of the particles are past 1.6 x the elite's published half-width (atlas.py's escape
+    distance) at the window's end, and chaos is averaged only over the particles still inside it.
+    Particles flying away barely turn, so counting them would make a world that comes apart look
+    orderly (an earlier version allowed half the particles to leave and averaged over all of them;
+    [0,1,2] then "lasted" past 280,000 steps with 20 of its 40 particles gone).
 Windows are checked every 10 frames (100 steps). A world's orderly time is the last step of the last
 window that passed before the first that failed: 0 if its first run already fails.
 
@@ -30,16 +33,16 @@ LOG = atlas.LOG_EVERY       # steps per logged frame
 WINDOW = 140                # frames: one standard run (1400 steps)
 STRIDE = 10                 # frames between window checks
 CHUNK = WINDOW * LOG        # steps simulated at a time
-ESCAPE = 0.5                # share of particles past atlas.py's escape distance that ends orderliness
+ESCAPE = 0.1                # share of particles past atlas.py's escape distance that ends orderliness
 EPS = 1e-9
 
 
 def turns(data):
-    """Mean folded heading turn per frame over the particles, as in atlas.measure (frames - 2,)."""
+    """Folded heading turn per frame and particle, as in atlas.measure (frames - 2, n)."""
     step = data[1:] - data[:-1]
     heading = np.arctan2(step[..., 1], step[..., 0])
     turn = np.abs((np.diff(heading, axis=0) + np.pi) % (2 * np.pi) - np.pi)
-    return np.minimum(turn, np.pi - turn).mean(1)
+    return np.minimum(turn, np.pi - turn)
 
 
 def run(task):
@@ -65,8 +68,9 @@ def run(task):
                 break
             m = turns(data)                      # m[t] is the turn at frame t + 1
             for end in range(max(WINDOW, len(chaos) * STRIDE + WINDOW), done + 1, STRIDE):
-                c = float(m[end - WINDOW:end - 2].mean())
-                out = float((np.hypot(data[end - 1, :, 0], data[end - 1, :, 1]) > far).mean())
+                gone = np.hypot(data[end - 1, :, 0], data[end - 1, :, 1]) > far
+                out = float(gone.mean())
+                c = float(m[end - WINDOW:end - 2, ~gone].mean()) if out < 1 else 0.0
                 chaos.append(c)
                 if c > edge:
                     reason = "chaos"

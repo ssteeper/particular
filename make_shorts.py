@@ -28,6 +28,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 import atlas
+from particular import build, simulate
 from make_hype import (BAR, BOLD, FONT, GAIN, LUT, MONO, PAN, PEAK, World, band, bloom, drum, over,
                        to_u8)
 from make_video import FPS, SR, note
@@ -41,7 +42,8 @@ END = 1 * BAR           # wordmark over the still
 TOTAL = DRAW + HOLD + END
 XF = 0.5                # crossfade from the drawing to the still
 GLOW = 0.3
-LOG = 2                 # simulation steps per logged snapshot; measuring takes every 5th (atlas.LOG_EVERY)
+LOG = 2                 # simulation steps per logged snapshot
+SNAPS = 14000           # at most this many snapshots; faster runs log less often so frames cost the same
 FAVOURITES = ["7-1-1", "5-1-5", "5-3-0", "3-6-0", "5-7-2"]
 ROOTS = [50, 53, 45, 48, 43, 46, 41]                    # make_video's chord roots, D F A C G Bb F
 PROG = [0, -4, -2, 0]   # chord under each pair of bars while drawing: I, bVI, bVII, I
@@ -52,19 +54,22 @@ def settings(entry, speed=1.0):
 
     speed scales the steps shown; trails keep the same share of the run, so the same screen time."""
     n, half = entry["n"], entry["half"]
-    steps = int(round(entry["genome"]["steps"] * speed / LOG)) * LOG
-    snaps = steps // LOG
+    log = LOG * max(1, -(-int(entry["genome"]["steps"] * speed) // (LOG * SNAPS)))
+    steps = int(round(entry["genome"]["steps"] * speed / log)) * log
+    snaps = steps // log
     tail = int(snaps * np.clip(0.4 * (8 / n) ** 0.25, 0.15, 0.4))
     return dict(cell=entry["cell"], half=(1.15 * half, 1.05 * half), tail=tail,
                 fade=1.5 if n <= 24 else 2.0, dot=1.8 if n <= 24 else 1.2,
-                steps=(tail * LOG // 2, steps), log=LOG)
+                steps=(0, steps), log=log)
 
 
-def measure(world, steps):
-    """atlas.measure on the CPU run, sampled as atlas.py logs it (every LOG_EVERY steps, `steps` steps)."""
-    stride = atlas.LOG_EVERY // LOG
-    data = world.data[::stride][:steps // atlas.LOG_EVERY]
+def measure(entry):
+    """atlas.measure on a CPU run of the scored run, logged as atlas.py logs it."""
+    g = entry["genome"]
+    b = build(g)
     with np.errstate(all="ignore"):
+        data = simulate(b["pos"], b["vel"], g["steps"], log_every=atlas.LOG_EVERY, g=b["g"], c=b["c"],
+                        species=b["species"], rules=b["rules"])
         return atlas.measure(data) if np.isfinite(data).all() else None
 
 
@@ -140,7 +145,7 @@ class Short:
         self.cfg = settings(entry, speed)
         with np.errstate(all="ignore"):
             self.world = World(entry, self.cfg)
-        self.m = measure(self.world, entry["genome"]["steps"])
+        self.m = measure(entry)
         edges = [ax["edges"] for ax in axes]
         self.cpu_cell = list(atlas.cell_of(self.m["features"], edges)) if self.m else None
         self.name = "-".join(map(str, entry["cell"]))

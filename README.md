@@ -49,7 +49,7 @@ The simulation uses fixed-step semi-implicit Euler (DT = 1e-5) and keeps it. Clo
 - `particular.py`: particle simulation, world/genome construction, starting setups, and species rule presets.
 - `atlas.py`: MAP-Elites search, behavior measurements, fitness, and atlas output. `--log` also records every evaluation for landscape analysis.
 - `landscape.py`: fitness-landscape study: `analyse` reads a logged run (needs `pip install scikit-learn`); `noise`, `sweep` and `structure` re-simulate elites on the GPU (start-position noise floor, pull × push planes, whether the structure term's dense-row cap is real); see `research/landscape-notes.md`.
-- `orderly.py`: runs every elite far past its scored run (28,000 steps by default) and records how long it stays orderly: the chaos measure over a 1,400-step window stays in the most orderly bin and the particles hold together; writes `search/orderly.json` (see `research/orderly-notes.md`).
+- `orderly.py`: runs every elite far past its scored run (28,000 steps by default) and records how long it stays orderly: the chaos measure (how sharply paths turn) over a 1,400-step window, among particles that have not escaped, stays in the most orderly bin, and at most 10% of particles escape; writes `search/orderly.json` (see `research/orderly-notes.md`).
 - `gpu_sim.py`: optional batched CUDA implementation used by the atlas; imports PyTorch only when used.
 - `make_web.py` and `web/app.html`: build the viewer page using the checked-in atlas JSON and thumbnails; output is `web/index.html`.
 - `web/report.html`: project research report; `research/` contains the MAP-Elites and GPU notes.
