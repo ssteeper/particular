@@ -3,3 +3,5 @@ __pycache__/
 *.wav
 *.silent.mp4
 search/landscape/run/
+explainer/work/
+explainer/pipeline/node_modules/
