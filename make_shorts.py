@@ -1,9 +1,11 @@
 """Render vertical shorts, one atlas world each, colored by time as in the viewer, with a soundtrack.
 
-Usage: python make_shorts.py [CELL ...] [--top N] [--all] [--out DIR] [--keep-drift] [--workers N]
+Usage: python make_shorts.py [CELL ...] [--top N] [--all] [--speed X] [--out DIR] [--keep-drift] [--workers N]
   CELL is an atlas cell such as 5-1-5. --top N adds the N fittest elites; --all renders every elite.
   With no cells, renders make_hype.py's five worlds. Writes DIR/<cell>.mp4 (1080 x 1920, about 16 s)
   and DIR/<cell>.jpg, a poster of the finished drawing (default DIR: video/shorts).
+  --speed X plays X times the scored run in the same screen time (X x the elite's steps; files
+  <cell>-xX.mp4); the drift check still measures the scored run, the first steps of it.
 
 Needs ffmpeg on PATH. Each world is rebuilt from search/atlas.json and simulated with numpy. The atlas
 was simulated on a GPU and the worlds are chaotic, so a CPU run can drift; each run is measured with
@@ -45,9 +47,12 @@ ROOTS = [50, 53, 45, 48, 43, 46, 41]                    # make_video's chord roo
 PROG = [0, -4, -2, 0]   # chord under each pair of bars while drawing: I, bVI, bVII, I
 
 
-def settings(entry):
-    """make_hype WORLDS row for an elite: view from its framing, trail and dots from its size."""
-    n, steps, half = entry["n"], entry["genome"]["steps"], entry["half"]
+def settings(entry, speed=1.0):
+    """make_hype WORLDS row for an elite: view from its framing, trail and dots from its size.
+
+    speed scales the steps shown; trails keep the same share of the run, so the same screen time."""
+    n, half = entry["n"], entry["half"]
+    steps = int(round(entry["genome"]["steps"] * speed / LOG)) * LOG
     snaps = steps // LOG
     tail = int(snaps * np.clip(0.4 * (8 / n) ** 0.25, 0.15, 0.4))
     return dict(cell=entry["cell"], half=(1.15 * half, 1.05 * half), tail=tail,
@@ -130,15 +135,16 @@ def paint(img, lay, a, origin=0):
 # ------------------------------------------------------------------- the short
 
 class Short:
-    def __init__(self, entry, axes):
-        self.entry, self.axes = entry, axes
-        self.cfg = settings(entry)
+    def __init__(self, entry, axes, speed=1.0):
+        self.entry, self.axes, self.speed = entry, axes, speed
+        self.cfg = settings(entry, speed)
         with np.errstate(all="ignore"):
             self.world = World(entry, self.cfg)
         self.m = measure(self.world, entry["genome"]["steps"])
         edges = [ax["edges"] for ax in axes]
         self.cpu_cell = list(atlas.cell_of(self.m["features"], edges)) if self.m else None
         self.name = "-".join(map(str, entry["cell"]))
+        self.file = self.name + (f"-x{speed:g}" if speed != 1 else "")
 
     @property
     def drifted(self):
@@ -191,12 +197,15 @@ class Short:
         species = e["genome"].get("species", 1)
         mark = text_mask([("particular", BOLD, 40, 70, 1.0, 6)])
         big = text_mask([("particular", BOLD, 110, TOP + S // 2 - 110, 1.0, 14)])
-        meter_rgb, meter = meters(e["cell"], self.axes, 340)
+        fast = self.speed != 1
+        meter_rgb, meter = meters(e["cell"], self.axes, 370 if fast else 340)
         self.mark = layer(mark, rainbow(mark))
         self.head = layer(text_mask([(f"world {self.name}", BOLD, 64, 140, 1.0, 2),
                                      (e["desc"], MONO, 26, 232, 0.8, 0)]), 1.0)
         self.stats = layer(text_mask([(f"{e['n']} particles \u00b7 {species} species \u00b7 fitness {f:.2f}",
-                                       MONO, 26, 274, 0.65, 0)]), 1.0)
+                                       MONO, 26, 274, 0.65, 0)]
+                                     + ([(f"{self.speed:g}\u00d7 speed \u00b7 {self.cfg['steps'][1]:,} steps",
+                                          MONO, 26, 316, 0.65, 0)] if fast else [])), 1.0)
         self.meter = layer(meter, meter_rgb)
         self.big = layer(big, rainbow(big))
         self.sub = layer(text_mask([("an atlas of particle worlds", FONT, 36, TOP + S // 2 + 40, 1.0, 3)]), 0.85)
@@ -334,15 +343,15 @@ class Short:
 # ---------------------------------------------------------------------- output
 
 def make(task):
-    entry, axes, out_dir, keep_drift = task
+    entry, axes, out_dir, keep_drift, speed = task
     began = time.time()
-    short = Short(entry, axes)
+    short = Short(entry, axes, speed)
     name = short.name
     if short.m is None:
         return f"{name}: skipped, the CPU run broke"
     if short.drifted and not keep_drift:
         return f"{name}: skipped, the CPU run lands in {'-'.join(map(str, short.cpu_cell))}"
-    out = os.path.join(out_dir, name + ".mp4")
+    out = os.path.join(out_dir, short.file + ".mp4")
     short.render_audio(out + ".wav")
     short.render_video(out + ".silent.mp4")
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", out + ".silent.mp4", "-i", out + ".wav",
@@ -350,7 +359,7 @@ def make(task):
                    check=True)
     os.remove(out + ".silent.mp4")
     os.remove(out + ".wav")
-    short.poster(os.path.join(out_dir, name + ".jpg"))
+    short.poster(os.path.join(out_dir, short.file + ".jpg"))
     drift = f" (CPU run in {'-'.join(map(str, short.cpu_cell))})" if short.drifted else ""
     return (f"{name}: {entry['desc']}, fitness {short.m['fitness']:.2f} on CPU, "
             f"{entry['fitness']:.2f} published{drift}, {time.time() - began:.0f} s")
@@ -362,6 +371,7 @@ def main():
     p.add_argument("--top", type=int, default=0, help="also render the N fittest elites")
     p.add_argument("--all", action="store_true", help="render every elite")
     p.add_argument("--out", default=os.path.join("video", "shorts"))
+    p.add_argument("--speed", type=float, default=1.0, help="show X times the scored run in the same time")
     p.add_argument("--keep-drift", action="store_true", help="render worlds whose CPU run leaves their cell")
     p.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 1) - 1))
     args = p.parse_args()
@@ -377,7 +387,7 @@ def main():
     if missing:
         p.error("no elite in cell " + ", ".join(missing))
     os.makedirs(args.out, exist_ok=True)
-    tasks = [(elites[c], data["axes"], args.out, args.keep_drift) for c in names]
+    tasks = [(elites[c], data["axes"], args.out, args.keep_drift, args.speed) for c in names]
     print(f"{len(tasks)} shorts, {TOTAL:.1f} s each, {args.workers} workers")
     with Pool(min(args.workers, len(tasks))) as pool:
         for line in pool.imap_unordered(make, tasks):

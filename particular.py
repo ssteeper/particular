@@ -17,11 +17,13 @@ C = 1e7
 DT = 1e-5
 
 
-def simulate(pos, vel, steps, log_every=10, dt=DT, g=G, c=C, species=None, rules=None):
+def simulate(pos, vel, steps, log_every=10, dt=DT, g=G, c=C, species=None, rules=None, state=False):
     """Run the simulation and return logged positions, shape (frames, n, 2).
 
     species: int array (n,) of values 0..S-1, or None for all species 0.
     rules: {"pull": S x S, "push": S x S} multipliers, or None for all ones.
+    state: also return the final positions and velocities, (log, pos, vel), to continue the run;
+    with steps a multiple of log_every, chained runs log the same frames as one long run.
     """
     r = np.array(pos, dtype=float)
     v = np.array(vel, dtype=float)
@@ -42,7 +44,7 @@ def simulate(pos, vel, steps, log_every=10, dt=DT, g=G, c=C, species=None, rules
         r += v * dt
         if i % log_every == 0:
             log.append(r.copy())
-    return np.array(log)
+    return (np.array(log), r, v) if state else np.array(log)
 
 
 # Rules of a universe: pull[a][b] and push[a][b] scale how species a reacts to species b.
