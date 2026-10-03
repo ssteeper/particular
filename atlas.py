@@ -1,7 +1,7 @@
 """An atlas of possible worlds: MAP-Elites over random setups (see research/map-elites-notes.md).
 
 Usage: python atlas.py [evals] [--init N] [--replicates R] [--workers N] [--inflight N]
-                       [--device cpu|cuda|auto] [--batch N] [--out DIR]
+                       [--device cpu|cuda|auto] [--batch N] [--out DIR] [--log]
 
 Instead of ranking setups by one score, keep the best setup in every cell of a 3D map of
 behaviour, measured on the trajectory:
@@ -38,6 +38,10 @@ Each replicate evaluates `evals` random genomes (the random-sampling control) an
 for the same number of evaluations, seeded with the first --init of those random genomes. Bin
 edges are fixed from replicate 0's random genomes. Writes atlas.json (axes, edges, elites with
 genomes, metrics), a still per elite in atlas/ and atlas.png, the map as a grid, to --out (search/).
+--log also writes evals.jsonl.gz to --out: one line per evaluation, in the order results arrived
+(rep, kind "random" or "child", i, fitness, features, terms, n, genome; children add op, parent
+and new, true if the child entered the archive). MAP-Elites' first --init genomes are the
+replicate's first random lines. For `landscape.py analyse` (research/landscape-notes.md).
 
 --device cuda simulates on the GPU (gpu_sim.py, needs torch with CUDA): MAP-Elites in batches of
 --batch children, random sampling in batches of GPU_SAMPLE_BATCH, while the CPU pool builds setups
@@ -48,6 +52,7 @@ maps that differ in detail (see research/gpu-notes.md).
 import argparse
 import copy
 import glob
+import gzip
 import json
 import os
 import queue
@@ -469,9 +474,16 @@ def bin_archive(results, edges):
     return archive
 
 
-def run_map_elites(run, seed, init, evals, edges):
+def log_eval(f, rep, kind, i, r, **extra):
+    """One --log line: an evaluation's result, as written to evals.jsonl.gz."""
+    keep = ("fitness", "features", "terms", "n", "op", "parent", "error", "genome")
+    f.write(json.dumps({"rep": rep, "kind": kind, "i": i, **{k: r[k] for k in keep if k in r}, **extra}) + "\n")
+
+
+def run_map_elites(run, seed, init, evals, edges, log=None):
     """MAP-Elites from the random results `init`, for evals - len(init) children.
-    Returns the archive and one record per child for the locality check."""
+    Returns the archive and one record per child for the locality check. log(result, new), if
+    given, sees every child as it arrives."""
     archive = bin_archive(init, edges)
     rng = np.random.default_rng([seed, 1 << 20])
     children = []
@@ -497,6 +509,8 @@ def run_map_elites(run, seed, init, evals, edges):
                 archive[cell] = {**r, "cell": list(cell)}
                 rec["new"] = True
         children.append(rec)
+        if log is not None:
+            log(r, rec.get("new", False))
 
     run(next_task, evals - len(init), insert)
     return archive, children
@@ -614,6 +628,7 @@ def main():
                     help=f"cuda: MAP-Elites genomes per GPU batch, {GPU_STREAMS} in flight; larger is faster, "
                          "smaller lets selection see newer elites")
     ap.add_argument("--out", default=OUT, help="output folder")
+    ap.add_argument("--log", action="store_true", help="also write every evaluation to <out>/evals.jsonl.gz")
     args = ap.parse_args()
     inflight = args.inflight or 3 * args.workers
     device = pick_device(args.device)
@@ -625,6 +640,7 @@ def main():
     t0 = time.time()
 
     os.makedirs(os.path.join(args.out, "atlas"), exist_ok=True)
+    log_file = gzip.open(os.path.join(args.out, "evals.jsonl.gz"), "wt") if args.log else None
     with Pool(args.workers) as pool:
         if device == "cuda":
             def on_gpu(batch):
@@ -636,14 +652,24 @@ def main():
         for rep in range(args.replicates):
             print(f"replicate {rep}: random sampling, {args.evals} evaluations", flush=True)
             randoms.append(run_random(sample, rep, args.evals))
+            if log_file:
+                for r in randoms[rep]:
+                    log_eval(log_file, rep, "random", r["index"], r)
             if rep == 0:
                 edges = calibrate(randoms[0])
                 print("bin edges:", [[round(v, 3) for v in e] for e in edges], flush=True)
             print(f"replicate {rep}: MAP-Elites, {args.evals} evaluations", flush=True)
-            archive, children = run_map_elites(select, rep, randoms[rep][:args.init], args.evals, edges)
+            log = None
+            if log_file:
+                count = iter(range(args.evals))
+                def log(r, new, rep=rep):
+                    log_eval(log_file, rep, "child", next(count), r, new=new)
+            archive, children = run_map_elites(select, rep, randoms[rep][:args.init], args.evals, edges, log)
             maps.append(archive)
             kids.append(children)
         search_time = time.time() - t0
+        if log_file:
+            log_file.close()
 
         baselines = [bin_archive(r, edges) for r in randoms]
         best = {}

@@ -1,0 +1,1217 @@
+{
+ "seconds": 33,
+ "runs": 46260,
+ "grid": 48,
+ "range": [
+  -2.0,
+  2.0
+ ],
+ "headroom": 0.05,
+ "selection": "the five favourites, then farthest-point picks over (chaos, density, branching, fitness) scaled to 0..1 (landscape.spread_picks)",
+ "median": {
+  "roughness": 0.036,
+  "roughness_over_noise": 25.348,
+  "noise_std": 0.0,
+  "cells_reached": 81.5,
+  "cell_change_adjacent": 0.504,
+  "cell_points": 30.5,
+  "cell_region_points": 17.0,
+  "share_within_0.05": 0.157,
+  "share_above_elite": 0.064,
+  "share_above_noise_mean": 0.066,
+  "cell_gap": 0.003
+ },
+ "variogram_median": {
+  "1": 0.036,
+  "2": 0.044,
+  "4": 0.059,
+  "8": 0.094,
+  "16": 0.141
+ },
+ "variance_explained_median": {
+  "push_minus_pull": 0.667,
+  "pull": 0.253,
+  "push": 0.081,
+  "push_plus_pull": 0.114
+ },
+ "elite_optimum": {
+  "plane": 0,
+  "cell": 7,
+  "near_in_cell": 11
+ },
+ "cell_gap_within_0.01": 16,
+ "by_chaos_bin": {
+  "pairs": [
+   1778,
+   5882,
+   10548,
+   13871,
+   15618,
+   17255,
+   15661,
+   9627
+  ],
+  "roughness": [
+   0.007,
+   0.022,
+   0.029,
+   0.03,
+   0.039,
+   0.051,
+   0.06,
+   0.067
+  ],
+  "cell_change": [
+   0.206,
+   0.353,
+   0.369,
+   0.435,
+   0.493,
+   0.575,
+   0.711,
+   0.745
+  ]
+ },
+ "planes": [
+  {
+   "cell": [
+    7,
+    1,
+    1
+   ],
+   "fitness": 0.6913,
+   "noise_mean": 0.691,
+   "noise_std": 0.0,
+   "log2_pull": -0.011,
+   "log2_push": 0.45,
+   "plane_max": 0.844,
+   "plane_max_at": [
+    1.234,
+    0.553
+   ],
+   "plane_max_cell": [
+    3,
+    0,
+    5
+   ],
+   "share_above_elite": 0.794,
+   "share_above_noise_mean": 0.795,
+   "cell_max": 0.657,
+   "share_of_cell_above_elite": 0.0,
+   "near_max": 0.753,
+   "near_cell_max": 0.592,
+   "share_within_0.05": 0.422,
+   "cell_points": 4,
+   "cell_region_points": 0,
+   "cell_share": 0.0017,
+   "cell_region_connected": 0.0,
+   "cells_reached": 48,
+   "roughness": 0.077,
+   "roughness_over_noise": 67.864,
+   "variogram": {
+    "1": 0.077,
+    "2": 0.078,
+    "4": 0.084,
+    "8": 0.101,
+    "16": 0.12
+   },
+   "cell_change_adjacent": 0.576,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.138,
+    "pull": 0.111,
+    "push": 0.02,
+    "push_plus_pull": 0.039
+   },
+   "cell_gap": -0.034,
+   "optimum": {
+    "plane": false,
+    "cell": true,
+    "near_in_cell": true
+   }
+  },
+  {
+   "cell": [
+    5,
+    1,
+    5
+   ],
+   "fitness": 0.8044,
+   "noise_mean": 0.804,
+   "noise_std": 0.0,
+   "log2_pull": 0.18,
+   "log2_push": 1.142,
+   "plane_max": 0.833,
+   "plane_max_at": [
+    1.83,
+    -1.149
+   ],
+   "plane_max_cell": [
+    5,
+    0,
+    5
+   ],
+   "share_above_elite": 0.311,
+   "share_above_noise_mean": 0.322,
+   "cell_max": 0.807,
+   "share_of_cell_above_elite": 0.029,
+   "near_max": 0.807,
+   "near_cell_max": 0.807,
+   "share_within_0.05": 0.792,
+   "cell_points": 140,
+   "cell_region_points": 134,
+   "cell_share": 0.0608,
+   "cell_region_connected": 0.0582,
+   "cells_reached": 40,
+   "roughness": 0.032,
+   "roughness_over_noise": 28.775,
+   "variogram": {
+    "1": 0.032,
+    "2": 0.036,
+    "4": 0.042,
+    "8": 0.05,
+    "16": 0.062
+   },
+   "cell_change_adjacent": 0.353,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.13,
+    "pull": 0.082,
+    "push": 0.021,
+    "push_plus_pull": 0.087
+   },
+   "cell_gap": 0.003,
+   "optimum": {
+    "plane": false,
+    "cell": false,
+    "near_in_cell": false
+   }
+  },
+  {
+   "cell": [
+    5,
+    3,
+    0
+   ],
+   "fitness": 0.7619,
+   "noise_mean": 0.762,
+   "noise_std": 0.0,
+   "log2_pull": -2.0,
+   "log2_push": 0.475,
+   "plane_max": 0.765,
+   "plane_max_at": [
+    -2.0,
+    0.468
+   ],
+   "plane_max_cell": [
+    5,
+    3,
+    0
+   ],
+   "share_above_elite": 0.001,
+   "share_above_noise_mean": 0.001,
+   "cell_max": 0.765,
+   "share_of_cell_above_elite": 0.083,
+   "near_max": 0.765,
+   "near_cell_max": 0.765,
+   "share_within_0.05": 0.021,
+   "cell_points": 24,
+   "cell_region_points": 19,
+   "cell_share": 0.0104,
+   "cell_region_connected": 0.0082,
+   "cells_reached": 100,
+   "roughness": 0.071,
+   "roughness_over_noise": 62.485,
+   "variogram": {
+    "1": 0.071,
+    "2": 0.077,
+    "4": 0.088,
+    "8": 0.114,
+    "16": 0.166
+   },
+   "cell_change_adjacent": 0.805,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.747,
+    "pull": 0.183,
+    "push": 0.093,
+    "push_plus_pull": 0.119
+   },
+   "cell_gap": 0.003,
+   "optimum": {
+    "plane": false,
+    "cell": false,
+    "near_in_cell": false
+   }
+  },
+  {
+   "cell": [
+    3,
+    6,
+    0
+   ],
+   "fitness": 0.7103,
+   "noise_mean": 0.71,
+   "noise_std": 0.0,
+   "log2_pull": -1.177,
+   "log2_push": -1.247,
+   "plane_max": 0.781,
+   "plane_max_at": [
+    -1.915,
+    -1.489
+   ],
+   "plane_max_cell": [
+    1,
+    5,
+    2
+   ],
+   "share_above_elite": 0.134,
+   "share_above_noise_mean": 0.134,
+   "cell_max": 0.703,
+   "share_of_cell_above_elite": 0.0,
+   "near_max": 0.752,
+   "near_cell_max": 0.703,
+   "share_within_0.05": 0.147,
+   "cell_points": 59,
+   "cell_region_points": 57,
+   "cell_share": 0.0256,
+   "cell_region_connected": 0.0247,
+   "cells_reached": 72,
+   "roughness": 0.028,
+   "roughness_over_noise": 24.396,
+   "variogram": {
+    "1": 0.028,
+    "2": 0.038,
+    "4": 0.06,
+    "8": 0.105,
+    "16": 0.185
+   },
+   "cell_change_adjacent": 0.392,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.749,
+    "pull": 0.639,
+    "push": 0.043,
+    "push_plus_pull": 0.198
+   },
+   "cell_gap": -0.007,
+   "optimum": {
+    "plane": false,
+    "cell": true,
+    "near_in_cell": true
+   }
+  },
+  {
+   "cell": [
+    5,
+    7,
+    2
+   ],
+   "fitness": 0.4779,
+   "noise_mean": 0.478,
+   "noise_std": 0.0,
+   "log2_pull": -0.623,
+   "log2_push": 1.617,
+   "plane_max": 0.613,
+   "plane_max_at": [
+    -2.0,
+    -0.553
+   ],
+   "plane_max_cell": [
+    5,
+    4,
+    0
+   ],
+   "share_above_elite": 0.242,
+   "share_above_noise_mean": 0.241,
+   "cell_max": 0.501,
+   "share_of_cell_above_elite": 0.189,
+   "near_max": 0.511,
+   "near_cell_max": 0.487,
+   "share_within_0.05": 0.167,
+   "cell_points": 180,
+   "cell_region_points": 180,
+   "cell_share": 0.0781,
+   "cell_region_connected": 0.0781,
+   "cells_reached": 57,
+   "roughness": 0.026,
+   "roughness_over_noise": 22.775,
+   "variogram": {
+    "1": 0.026,
+    "2": 0.035,
+    "4": 0.055,
+    "8": 0.098,
+    "16": 0.169
+   },
+   "cell_change_adjacent": 0.457,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.743,
+    "pull": 0.524,
+    "push": 0.094,
+    "push_plus_pull": 0.084
+   },
+   "cell_gap": 0.023,
+   "optimum": {
+    "plane": false,
+    "cell": false,
+    "near_in_cell": false
+   }
+  },
+  {
+   "cell": [
+    0,
+    7,
+    5
+   ],
+   "fitness": 0.2786,
+   "noise_mean": 0.277,
+   "noise_std": 0.001,
+   "log2_pull": -1.904,
+   "log2_push": 1.746,
+   "plane_max": 0.626,
+   "plane_max_at": [
+    1.83,
+    -1.574
+   ],
+   "plane_max_cell": [
+    3,
+    0,
+    5
+   ],
+   "share_above_elite": 0.581,
+   "share_above_noise_mean": 0.6,
+   "cell_max": 0.279,
+   "share_of_cell_above_elite": 0.136,
+   "near_max": 0.279,
+   "near_cell_max": 0.279,
+   "share_within_0.05": 0.458,
+   "cell_points": 22,
+   "cell_region_points": 16,
+   "cell_share": 0.0095,
+   "cell_region_connected": 0.0069,
+   "cells_reached": 85,
+   "roughness": 0.042,
+   "roughness_over_noise": 37.152,
+   "variogram": {
+    "1": 0.042,
+    "2": 0.046,
+    "4": 0.055,
+    "8": 0.073,
+    "16": 0.093
+   },
+   "cell_change_adjacent": 0.622,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.588,
+    "pull": 0.237,
+    "push": 0.097,
+    "push_plus_pull": 0.063
+   },
+   "cell_gap": 0.0,
+   "optimum": {
+    "plane": false,
+    "cell": false,
+    "near_in_cell": false
+   }
+  },
+  {
+   "cell": [
+    0,
+    0,
+    2
+   ],
+   "fitness": 0.857,
+   "noise_mean": 0.857,
+   "noise_std": 0.0,
+   "log2_pull": -2.0,
+   "log2_push": -0.221,
+   "plane_max": 0.862,
+   "plane_max_at": [
+    -2.0,
+    -0.298
+   ],
+   "plane_max_cell": [
+    0,
+    0,
+    2
+   ],
+   "share_above_elite": 0.008,
+   "share_above_noise_mean": 0.008,
+   "cell_max": 0.862,
+   "share_of_cell_above_elite": 0.033,
+   "near_max": 0.862,
+   "near_cell_max": 0.862,
+   "share_within_0.05": 0.312,
+   "cell_points": 30,
+   "cell_region_points": 30,
+   "cell_share": 0.013,
+   "cell_region_connected": 0.013,
+   "cells_reached": 52,
+   "roughness": 0.03,
+   "roughness_over_noise": 26.3,
+   "variogram": {
+    "1": 0.03,
+    "2": 0.037,
+    "4": 0.053,
+    "8": 0.092,
+    "16": 0.181
+   },
+   "cell_change_adjacent": 0.317,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.802,
+    "pull": 0.779,
+    "push": 0.113,
+    "push_plus_pull": 0.15
+   },
+   "cell_gap": 0.005,
+   "optimum": {
+    "plane": false,
+    "cell": false,
+    "near_in_cell": false
+   }
+  },
+  {
+   "cell": [
+    0,
+    2,
+    5
+   ],
+   "fitness": 0.5974,
+   "noise_mean": 0.597,
+   "noise_std": 0.0,
+   "log2_pull": 0.718,
+   "log2_push": 1.454,
+   "plane_max": 0.741,
+   "plane_max_at": [
+    -0.638,
+    -1.319
+   ],
+   "plane_max_cell": [
+    3,
+    1,
+    5
+   ],
+   "share_above_elite": 0.102,
+   "share_above_noise_mean": 0.103,
+   "cell_max": 0.662,
+   "share_of_cell_above_elite": 0.273,
+   "near_max": 0.649,
+   "near_cell_max": 0.488,
+   "share_within_0.05": 0.139,
+   "cell_points": 22,
+   "cell_region_points": 0,
+   "cell_share": 0.0095,
+   "cell_region_connected": 0.0,
+   "cells_reached": 106,
+   "roughness": 0.113,
+   "roughness_over_noise": 99.724,
+   "variogram": {
+    "1": 0.113,
+    "2": 0.121,
+    "4": 0.13,
+    "8": 0.143,
+    "16": 0.159
+   },
+   "cell_change_adjacent": 0.853,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.324,
+    "pull": 0.137,
+    "push": 0.032,
+    "push_plus_pull": 0.07
+   },
+   "cell_gap": 0.065,
+   "optimum": {
+    "plane": false,
+    "cell": false,
+    "near_in_cell": true
+   }
+  },
+  {
+   "cell": [
+    0,
+    6,
+    3
+   ],
+   "fitness": 0.7332,
+   "noise_mean": 0.733,
+   "noise_std": 0.0,
+   "log2_pull": -1.635,
+   "log2_push": -1.876,
+   "plane_max": 0.744,
+   "plane_max_at": [
+    -1.489,
+    -1.66
+   ],
+   "plane_max_cell": [
+    1,
+    6,
+    2
+   ],
+   "share_above_elite": 0.002,
+   "share_above_noise_mean": 0.002,
+   "cell_max": 0.729,
+   "share_of_cell_above_elite": 0.0,
+   "near_max": 0.735,
+   "near_cell_max": 0.729,
+   "share_within_0.05": 0.043,
+   "cell_points": 1,
+   "cell_region_points": 1,
+   "cell_share": 0.0004,
+   "cell_region_connected": 0.0004,
+   "cells_reached": 108,
+   "roughness": 0.032,
+   "roughness_over_noise": 28.176,
+   "variogram": {
+    "1": 0.032,
+    "2": 0.037,
+    "4": 0.05,
+    "8": 0.075,
+    "16": 0.125
+   },
+   "cell_change_adjacent": 0.496,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.356,
+    "pull": 0.739,
+    "push": 0.02,
+    "push_plus_pull": 0.452
+   },
+   "cell_gap": -0.004,
+   "optimum": {
+    "plane": false,
+    "cell": true,
+    "near_in_cell": true
+   }
+  },
+  {
+   "cell": [
+    7,
+    5,
+    5
+   ],
+   "fitness": 0.436,
+   "noise_mean": 0.435,
+   "noise_std": 0.002,
+   "log2_pull": 1.775,
+   "log2_push": -2.0,
+   "plane_max": 0.662,
+   "plane_max_at": [
+    2.0,
+    -0.383
+   ],
+   "plane_max_cell": [
+    5,
+    0,
+    5
+   ],
+   "share_above_elite": 0.51,
+   "share_above_noise_mean": 0.511,
+   "cell_max": 0.504,
+   "share_of_cell_above_elite": 1.0,
+   "near_max": 0.609,
+   "near_cell_max": null,
+   "share_within_0.05": 0.288,
+   "cell_points": 1,
+   "cell_region_points": 0,
+   "cell_share": 0.0004,
+   "cell_region_connected": 0.0,
+   "cells_reached": 104,
+   "roughness": 0.029,
+   "roughness_over_noise": 13.006,
+   "variogram": {
+    "1": 0.029,
+    "2": 0.035,
+    "4": 0.047,
+    "8": 0.074,
+    "16": 0.119
+   },
+   "cell_change_adjacent": 0.464,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.64,
+    "pull": 0.058,
+    "push": 0.414,
+    "push_plus_pull": 0.186
+   },
+   "cell_gap": 0.068,
+   "optimum": {
+    "plane": false,
+    "cell": false,
+    "near_in_cell": true
+   }
+  },
+  {
+   "cell": [
+    4,
+    4,
+    3
+   ],
+   "fitness": 0.7231,
+   "noise_mean": 0.723,
+   "noise_std": 0.0,
+   "log2_pull": -2.0,
+   "log2_push": 0.795,
+   "plane_max": 0.729,
+   "plane_max_at": [
+    -2.0,
+    0.809
+   ],
+   "plane_max_cell": [
+    4,
+    3,
+    3
+   ],
+   "share_above_elite": 0.001,
+   "share_above_noise_mean": 0.001,
+   "cell_max": 0.721,
+   "share_of_cell_above_elite": 0.0,
+   "near_max": 0.729,
+   "near_cell_max": 0.721,
+   "share_within_0.05": 0.03,
+   "cell_points": 3,
+   "cell_region_points": 0,
+   "cell_share": 0.0013,
+   "cell_region_connected": 0.0,
+   "cells_reached": 92,
+   "roughness": 0.063,
+   "roughness_over_noise": 56.104,
+   "variogram": {
+    "1": 0.063,
+    "2": 0.07,
+    "4": 0.083,
+    "8": 0.111,
+    "16": 0.158
+   },
+   "cell_change_adjacent": 0.707,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.695,
+    "pull": 0.254,
+    "push": 0.091,
+    "push_plus_pull": 0.093
+   },
+   "cell_gap": -0.002,
+   "optimum": {
+    "plane": false,
+    "cell": true,
+    "near_in_cell": true
+   }
+  },
+  {
+   "cell": [
+    0,
+    3,
+    0
+   ],
+   "fitness": 0.8148,
+   "noise_mean": 0.815,
+   "noise_std": 0.0,
+   "log2_pull": -1.016,
+   "log2_push": -1.713,
+   "plane_max": 0.818,
+   "plane_max_at": [
+    -0.638,
+    -0.809
+   ],
+   "plane_max_cell": [
+    1,
+    3,
+    1
+   ],
+   "share_above_elite": 0.018,
+   "share_above_noise_mean": 0.015,
+   "cell_max": 0.812,
+   "share_of_cell_above_elite": 0.0,
+   "near_max": 0.817,
+   "near_cell_max": 0.812,
+   "share_within_0.05": 0.311,
+   "cell_points": 21,
+   "cell_region_points": 19,
+   "cell_share": 0.0091,
+   "cell_region_connected": 0.0082,
+   "cells_reached": 36,
+   "roughness": 0.013,
+   "roughness_over_noise": 11.191,
+   "variogram": {
+    "1": 0.013,
+    "2": 0.022,
+    "4": 0.041,
+    "8": 0.078,
+    "16": 0.143
+   },
+   "cell_change_adjacent": 0.256,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.736,
+    "pull": 0.278,
+    "push": 0.062,
+    "push_plus_pull": 0.278
+   },
+   "cell_gap": -0.003,
+   "optimum": {
+    "plane": false,
+    "cell": true,
+    "near_in_cell": true
+   }
+  },
+  {
+   "cell": [
+    4,
+    0,
+    2
+   ],
+   "fitness": 0.8765,
+   "noise_mean": 0.877,
+   "noise_std": 0.0,
+   "log2_pull": -1.691,
+   "log2_push": 0.435,
+   "plane_max": 0.885,
+   "plane_max_at": [
+    -2.0,
+    0.128
+   ],
+   "plane_max_cell": [
+    3,
+    0,
+    2
+   ],
+   "share_above_elite": 0.006,
+   "share_above_noise_mean": 0.006,
+   "cell_max": 0.881,
+   "share_of_cell_above_elite": 0.161,
+   "near_max": 0.879,
+   "near_cell_max": 0.879,
+   "share_within_0.05": 0.095,
+   "cell_points": 31,
+   "cell_region_points": 12,
+   "cell_share": 0.0135,
+   "cell_region_connected": 0.0052,
+   "cells_reached": 59,
+   "roughness": 0.037,
+   "roughness_over_noise": 32.655,
+   "variogram": {
+    "1": 0.037,
+    "2": 0.046,
+    "4": 0.064,
+    "8": 0.105,
+    "16": 0.185
+   },
+   "cell_change_adjacent": 0.493,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.821,
+    "pull": 0.708,
+    "push": 0.136,
+    "push_plus_pull": 0.112
+   },
+   "cell_gap": 0.005,
+   "optimum": {
+    "plane": false,
+    "cell": false,
+    "near_in_cell": false
+   }
+  },
+  {
+   "cell": [
+    3,
+    5,
+    5
+   ],
+   "fitness": 0.5178,
+   "noise_mean": 0.516,
+   "noise_std": 0.005,
+   "log2_pull": 1.694,
+   "log2_push": -1.09,
+   "plane_max": 0.72,
+   "plane_max_at": [
+    -2.0,
+    -1.745
+   ],
+   "plane_max_cell": [
+    3,
+    3,
+    0
+   ],
+   "share_above_elite": 0.191,
+   "share_above_noise_mean": 0.195,
+   "cell_max": 0.538,
+   "share_of_cell_above_elite": 0.5,
+   "near_max": 0.562,
+   "near_cell_max": 0.477,
+   "share_within_0.05": 0.234,
+   "cell_points": 2,
+   "cell_region_points": 0,
+   "cell_share": 0.0009,
+   "cell_region_connected": 0.0,
+   "cells_reached": 151,
+   "roughness": 0.044,
+   "roughness_over_noise": 7.848,
+   "variogram": {
+    "1": 0.044,
+    "2": 0.054,
+    "4": 0.072,
+    "8": 0.109,
+    "16": 0.164
+   },
+   "cell_change_adjacent": 0.617,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.529,
+    "pull": 0.252,
+    "push": 0.015,
+    "push_plus_pull": 0.116
+   },
+   "cell_gap": 0.02,
+   "optimum": {
+    "plane": false,
+    "cell": false,
+    "near_in_cell": true
+   }
+  },
+  {
+   "cell": [
+    1,
+    0,
+    5
+   ],
+   "fitness": 0.8674,
+   "noise_mean": 0.867,
+   "noise_std": 0.0,
+   "log2_pull": -1.885,
+   "log2_push": -0.749,
+   "plane_max": 0.898,
+   "plane_max_at": [
+    -1.234,
+    -0.213
+   ],
+   "plane_max_cell": [
+    3,
+    0,
+    4
+   ],
+   "share_above_elite": 0.026,
+   "share_above_noise_mean": 0.028,
+   "cell_max": 0.873,
+   "share_of_cell_above_elite": 0.077,
+   "near_max": 0.881,
+   "near_cell_max": 0.873,
+   "share_within_0.05": 0.133,
+   "cell_points": 52,
+   "cell_region_points": 52,
+   "cell_share": 0.0226,
+   "cell_region_connected": 0.0226,
+   "cells_reached": 64,
+   "roughness": 0.036,
+   "roughness_over_noise": 32.121,
+   "variogram": {
+    "1": 0.036,
+    "2": 0.044,
+    "4": 0.06,
+    "8": 0.096,
+    "16": 0.163
+   },
+   "cell_change_adjacent": 0.513,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.702,
+    "pull": 0.776,
+    "push": 0.049,
+    "push_plus_pull": 0.211
+   },
+   "cell_gap": 0.006,
+   "optimum": {
+    "plane": false,
+    "cell": false,
+    "near_in_cell": false
+   }
+  },
+  {
+   "cell": [
+    7,
+    6,
+    0
+   ],
+   "fitness": 0.5536,
+   "noise_mean": 0.551,
+   "noise_std": 0.003,
+   "log2_pull": -1.285,
+   "log2_push": 1.459,
+   "plane_max": 0.698,
+   "plane_max_at": [
+    -0.553,
+    0.213
+   ],
+   "plane_max_cell": [
+    6,
+    0,
+    5
+   ],
+   "share_above_elite": 0.009,
+   "share_above_noise_mean": 0.009,
+   "cell_max": 0.533,
+   "share_of_cell_above_elite": 0.0,
+   "near_max": 0.55,
+   "near_cell_max": 0.533,
+   "share_within_0.05": 0.046,
+   "cell_points": 48,
+   "cell_region_points": 20,
+   "cell_share": 0.0208,
+   "cell_region_connected": 0.0087,
+   "cells_reached": 83,
+   "roughness": 0.063,
+   "roughness_over_noise": 18.584,
+   "variogram": {
+    "1": 0.063,
+    "2": 0.069,
+    "4": 0.079,
+    "8": 0.092,
+    "16": 0.104
+   },
+   "cell_change_adjacent": 0.755,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.389,
+    "pull": 0.072,
+    "push": 0.041,
+    "push_plus_pull": 0.037
+   },
+   "cell_gap": -0.021,
+   "optimum": {
+    "plane": false,
+    "cell": true,
+    "near_in_cell": true
+   }
+  },
+  {
+   "cell": [
+    7,
+    1,
+    4
+   ],
+   "fitness": 0.5766,
+   "noise_mean": 0.554,
+   "noise_std": 0.031,
+   "log2_pull": 1.876,
+   "log2_push": -0.919,
+   "plane_max": 0.81,
+   "plane_max_at": [
+    1.404,
+    -0.979
+   ],
+   "plane_max_cell": [
+    7,
+    0,
+    0
+   ],
+   "share_above_elite": 0.194,
+   "share_above_noise_mean": 0.24,
+   "cell_max": 0.548,
+   "share_of_cell_above_elite": 0.0,
+   "near_max": 0.71,
+   "near_cell_max": 0.517,
+   "share_within_0.05": 0.183,
+   "cell_points": 32,
+   "cell_region_points": 2,
+   "cell_share": 0.0139,
+   "cell_region_connected": 0.0009,
+   "cells_reached": 80,
+   "roughness": 0.037,
+   "roughness_over_noise": 1.044,
+   "variogram": {
+    "1": 0.037,
+    "2": 0.044,
+    "4": 0.058,
+    "8": 0.082,
+    "16": 0.125
+   },
+   "cell_change_adjacent": 0.532,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.624,
+    "pull": 0.028,
+    "push": 0.358,
+    "push_plus_pull": 0.269
+   },
+   "cell_gap": -0.029,
+   "optimum": {
+    "plane": false,
+    "cell": true,
+    "near_in_cell": true
+   }
+  },
+  {
+   "cell": [
+    1,
+    7,
+    3
+   ],
+   "fitness": 0.4408,
+   "noise_mean": 0.441,
+   "noise_std": 0.0,
+   "log2_pull": -1.049,
+   "log2_push": 0.296,
+   "plane_max": 0.495,
+   "plane_max_at": [
+    0.979,
+    -2.0
+   ],
+   "plane_max_cell": [
+    3,
+    0,
+    5
+   ],
+   "share_above_elite": 0.136,
+   "share_above_noise_mean": 0.129,
+   "cell_max": 0.443,
+   "share_of_cell_above_elite": 0.112,
+   "near_max": 0.443,
+   "near_cell_max": 0.44,
+   "share_within_0.05": 0.455,
+   "cell_points": 233,
+   "cell_region_points": 0,
+   "cell_share": 0.1011,
+   "cell_region_connected": 0.0,
+   "cells_reached": 125,
+   "roughness": 0.019,
+   "roughness_over_noise": 16.911,
+   "variogram": {
+    "1": 0.019,
+    "2": 0.025,
+    "4": 0.035,
+    "8": 0.056,
+    "16": 0.094
+   },
+   "cell_change_adjacent": 0.496,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.838,
+    "pull": 0.422,
+    "push": 0.181,
+    "push_plus_pull": 0.032
+   },
+   "cell_gap": 0.002,
+   "optimum": {
+    "plane": false,
+    "cell": false,
+    "near_in_cell": true
+   }
+  },
+  {
+   "cell": [
+    7,
+    5,
+    4
+   ],
+   "fitness": 0.7319,
+   "noise_mean": 0.73,
+   "noise_std": 0.003,
+   "log2_pull": -0.967,
+   "log2_push": 0.627,
+   "plane_max": 0.844,
+   "plane_max_at": [
+    0.638,
+    0.128
+   ],
+   "plane_max_cell": [
+    6,
+    0,
+    0
+   ],
+   "share_above_elite": 0.018,
+   "share_above_noise_mean": 0.022,
+   "cell_max": 0.735,
+   "share_of_cell_above_elite": 0.048,
+   "near_max": 0.734,
+   "near_cell_max": 0.733,
+   "share_within_0.05": 0.105,
+   "cell_points": 42,
+   "cell_region_points": 18,
+   "cell_share": 0.0182,
+   "cell_region_connected": 0.0078,
+   "cells_reached": 117,
+   "roughness": 0.064,
+   "roughness_over_noise": 18.916,
+   "variogram": {
+    "1": 0.064,
+    "2": 0.073,
+    "4": 0.086,
+    "8": 0.109,
+    "16": 0.138
+   },
+   "cell_change_adjacent": 0.764,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.51,
+    "pull": 0.191,
+    "push": 0.07,
+    "push_plus_pull": 0.067
+   },
+   "cell_gap": 0.003,
+   "optimum": {
+    "plane": false,
+    "cell": false,
+    "near_in_cell": false
+   }
+  },
+  {
+   "cell": [
+    2,
+    0,
+    0
+   ],
+   "fitness": 0.901,
+   "noise_mean": 0.901,
+   "noise_std": 0.0,
+   "log2_pull": -1.552,
+   "log2_push": -1.373,
+   "plane_max": 0.903,
+   "plane_max_at": [
+    -1.574,
+    -1.404
+   ],
+   "plane_max_cell": [
+    2,
+    0,
+    0
+   ],
+   "share_above_elite": 0.001,
+   "share_above_noise_mean": 0.001,
+   "cell_max": 0.903,
+   "share_of_cell_above_elite": 0.009,
+   "near_max": 0.903,
+   "near_cell_max": 0.903,
+   "share_within_0.05": 0.045,
+   "cell_points": 217,
+   "cell_region_points": 215,
+   "cell_share": 0.0942,
+   "cell_region_connected": 0.0933,
+   "cells_reached": 79,
+   "roughness": 0.016,
+   "roughness_over_noise": 14.214,
+   "variogram": {
+    "1": 0.016,
+    "2": 0.023,
+    "4": 0.035,
+    "8": 0.058,
+    "16": 0.103
+   },
+   "cell_change_adjacent": 0.239,
+   "broken": 0.0,
+   "variance_explained": {
+    "push_minus_pull": 0.829,
+    "pull": 0.563,
+    "push": 0.093,
+    "push_plus_pull": 0.175
+   },
+   "cell_gap": 0.002,
+   "optimum": {
+    "plane": false,
+    "cell": false,
+    "near_in_cell": false
+   }
+  }
+ ]
+}
